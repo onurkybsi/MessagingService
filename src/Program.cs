@@ -15,11 +15,11 @@ namespace MessagingService
         {
             var configuration = InitialHelper.GetConfiguration(Directory.GetCurrentDirectory(), Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT"));
 
-            // Log.Logger = InitialHelper.CreateELKLogger(new ELKLoggerConfig
-            // {
-            //     AppName = configuration["ASPNETCORE_APPLICATIONNAME"],
-            //     ElasticsearchURL = configuration["ELASTICSEARCH_URL"]
-            // });
+            Log.Logger = InitialHelper.CreateELKLogger(new ELKLoggerConfig
+            {
+                AppName = configuration["ASPNETCORE_APPLICATIONNAME"],
+                ElasticsearchURL = configuration["ELASTICSEARCH_URL"]
+            });
 
             var host = CreateHostBuilder(args, configuration).Build();
 
@@ -33,7 +33,6 @@ namespace MessagingService
                 {
                     webBuilder.UseKestrel();
                     webBuilder.UseStartup<Startup>();
-                });
-        // ConfigureLogging(config => config.ClearProviders()).UseSerilog();
+                }).ConfigureLogging(config => config.ClearProviders()).UseSerilog();
     }
 }

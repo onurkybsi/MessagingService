@@ -16,6 +16,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.FileProviders;
 using Microsoft.Extensions.Hosting;
 using Microsoft.IdentityModel.Tokens;
+using Serilog;
 
 namespace MessagingService
 {
@@ -73,6 +74,8 @@ namespace MessagingService
                 endpoints.MapControllers();
                 endpoints.MapHub<MessageHub>("/messagehub");
             });
+
+            Log.ForContext<Startup>().Information("{Application} is listening on {Env}...", env.ApplicationName, env.EnvironmentName);
         }
 
         public void ConfigureAuth(IServiceCollection services)
@@ -91,9 +94,9 @@ namespace MessagingService
                         ValidateIssuer = false,
                         ValidateLifetime = true,
                         ValidateIssuerSigningKey = true,
-                        ValidIssuer = Configuration["JWTSettings:Issuer"],
-                        ValidAudience = Configuration["JWTSettings:Audience"],
-                        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(Configuration["JWTSettings:SecurityKey"])),
+                        ValidIssuer = Configuration["JwtAuthSettings:Issuer"],
+                        ValidAudience = Configuration["JwtAuthSettings:Audience"],
+                        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(Configuration["JwtAuthSettings:SecurityKey"])),
                         ClockSkew = TimeSpan.Zero
                     };
 
@@ -125,7 +128,7 @@ namespace MessagingService
             };
 
             services.AddSingleton<IUserRepository>(ur => new UserRepository(new MongoDBCollectionSettings { DatabaseSettings = messagingServiceDbSettings, CollectionName = "user" }));
-            services.AddSingleton<IMessageRepository>(mr => new MessageRepository(new MongoDBCollectionSettings { DatabaseSettings = messagingServiceDbSettings, CollectionName = "messsage" }));
+            services.AddSingleton<IMessageRepository>(mr => new MessageRepository(new MongoDBCollectionSettings { DatabaseSettings = messagingServiceDbSettings, CollectionName = "message" }));
         }
 
         private void ConfigureBusinessServices(IServiceCollection services)

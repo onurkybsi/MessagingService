@@ -2,6 +2,33 @@
 <html lang="tr">
   <head>
     <title>Messaging Service Test</title>
+    <style type="text/css">
+      a:hover {
+        cursor: pointer;
+      }
+      .tableFixHead {
+        overflow-y: auto;
+        height: 600px;
+      }
+      .tableFixHead thead th {
+        position: sticky;
+        top: 0;
+      }
+
+      /* Just common table stuff. Really. */
+      table {
+        border-collapse: collapse;
+        width: 100%;
+      }
+      th,
+      td {
+        padding: 8px 16px;
+      }
+      th {
+        background: #eee;
+      }
+    </style>
+
     <link
       rel="stylesheet"
       href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css"
@@ -13,6 +40,7 @@
       integrity="sha384-J6qa4849blE2+poT4WnyKhv5vZF5SrPo0iEjwBvKU7imGFAV0wwj1yYfoRSJoZ+n"
       crossorigin="anonymous"
     ></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
     <script
       src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js"
       integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo"
@@ -23,69 +51,335 @@
       integrity="sha384-wfSDF2E50Y2D1uUdj0O3uMBJnjuUD4Ih7YwaYd1iqfktj0Uod8GCExl3Og8ifwB6"
       crossorigin="anonymous"
     ></script>
+    <script src="https://use.fontawesome.com/68eb97251d.js"></script>
+
+    <script>
+      const ALL_USERS = "ALL_USERS";
+      let targetUser = ALL_USERS;
+      let connectedUsers = [];
+      let ME = undefined;
+
+      let createTable = (tableName) => {
+        return `<div class="tableFixHead" style="display: none">
+                <table id="${tableName}-messages">
+                  <thead>
+                    <tr>
+                      <th
+                        id="userInChat"
+                        style="text-align: center"
+                        colspan="2"
+                      >
+                        ${tableName}
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    
+                  </tbody>
+                </table>
+              </div>`;
+      };
+    </script>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/3.1.7/signalr.min.js"></script>
 
     <script>
       const connection = new signalR.HubConnectionBuilder()
-        .withUrl("/messagehub", { accessTokenFactory: () => this.loginToken })
+        .withUrl("/messagehub", {
+          accessTokenFactory: () =>
+            localStorage.getItem("accessToken") != null
+              ? localStorage.getItem("accessToken")
+              : "",
+        })
         .build();
+
+      connection.on("ReceiveMessage", (Message) => {
+        let tableName = undefined;
+        if (Message.senderUsername === ME) {
+          tableName = Message.receiverUserName;
+        } else if (Message.receiverUserName === ALL_USERS) {
+          tableName = ALL_USERS;
+        } else {
+          tableName = Message.senderUsername;
+        }
+
+        let messageLocation = Message.senderUsername === ME ? "right" : "left";
+
+        let messageContent = `<tr>
+                      <td style="width: 20%">${Message.timeToSend}</td>
+                      <td style="float: ${messageLocation};">${Message.messageContent}</td>
+                    </tr>`;
+        $(`#${tableName}-messages > tbody:last-child`).append(messageContent);
+      });
+
+      connection.on("HandleConnectedUserChange", (user) => {
+        if (user === ME) return;
+
+        let userIndex = connectedUsers.findIndex(
+          (connectedUser) => connectedUser === user
+        );
+        let onlineUsers = $("#onlineUsersUl");
+        if (userIndex === -1) {
+          onlineUsers.append(
+            `<a id="${user}" class="list-group-item list-group-item-action">
+                ${user}
+              </a>`
+          );
+          connectedUsers.push(user);
+        } else {
+          $(`#${user}`).remove();
+          connectedUsers.splice(userIndex, 1);
+        }
+      });
 
       async function start() {
         try {
           await connection.start();
           console.log("SignalR Connected.");
+          $.ajax({
+            type: "GET",
+            url: "/api/MessageHubInfo/GetConnectedUsernames",
+            contentType: "application/json; charset=utf-8",
+            headers: {
+              Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
+            },
+            success: (data) => executeAfterSuccessfulGettingUsers(data),
+            error: function (xhr, status, error) {
+              if (Number(xhr.status) < 200 || Number(xhr.status) > 200) {
+                var errorMessage = xhr.status + ": " + xhr.statusText;
+                alert("Error - " + errorMessage);
+              } else {
+                executeAfterSuccessfulGettingUsers(xhr.response);
+              }
+            },
+          });
         } catch (err) {
           console.log(err);
           setTimeout(start, 5000);
         }
       }
-
-      connection.on("ReceiveMessage", (message) => {
-        let messageContent = `<tr>
-                <th scope="row">User unknown</th>
-                <td>${message}</td>
-              </tr>`;
-        $("#messages > tbody:last-child").append(messageContent);
-      });
-
       connection.onclose(start);
-      start();
     </script>
   </head>
-  <body>
+  <body style="overflow-y: hidden; overflow-x: hidden">
     <div class="container-fluid">
-      <div class="row justify-content-md-center mt-5">
-        <div class="col-8">
-          <table id="messages" class="table table-striped">
-            <tbody></tbody>
-          </table>
+      <div class="row mx-3 mt-5">
+        <div id="forms" class="col-4" style="display: block">
+          <h1 id="headerLabel" class="display-4">Log In</h1>
+          <form style="margin-top: 2em">
+            <div class="form-group">
+              <label for="exampleInputEmail1">Username</label>
+              <input
+                class="form-control"
+                id="usernameInput"
+                placeholder="Enter username"
+              />
+            </div>
+            <div class="form-group">
+              <label for="exampleInputPassword1">Password</label>
+              <input
+                type="password"
+                class="form-control"
+                id="passwordInput"
+                placeholder="Password"
+              />
+            </div>
+          </form>
+          <button id="loginButton" class="btn btn-primary float-right">
+            Login
+          </button>
+          <button id="signInButton" class="btn btn-primary float-right mr-2">
+            Sign In
+          </button>
         </div>
-      </div>
-      <div class="container-fluid">
-        <div class="row justify-content-md-center mt-3">
-          <div class="col-4">
-            <label for="messageLabel">Message</label>
-            <textarea class="form-control" id="message" rows="3"></textarea>
+        <div id="onlineUsers" class="col-4" style="display: none">
+          <div class="row">
+            <i
+              class="fa fa-users fa-5"
+              style="
+                font-size: xxx-large;
+                align-self: center;
+                margin-right: 1em;
+              "
+              aria-hidden="true"
+            ></i>
+            <h1 id="headerLabel" class="display-4">Online Users</h1>
+          </div>
+          <div class="row mt-3 ml-5">
+            <ul id="onlineUsersUl" class="list-group w-75">
+              <a
+                id="ALL_USERS"
+                class="list-group-item list-group-item-action active"
+              >
+                All Users
+              </a>
+            </ul>
           </div>
         </div>
-        <div class="row justify-content-md-center mt-1">
-          <div class="col-4">
-            <button id="sendMessage" class="btn btn-primary float-right">
-              Send
-            </button>
+        <div id="messagePanel" class="col-8" style="display: none">
+          <div class="row">
+            <div id="messages" class="col">
+              <div class="tableFixHead" style="display: block">
+                <table id="ALL_USERS-messages">
+                  <thead>
+                    <tr>
+                      <th
+                        id="userInChat"
+                        style="text-align: center"
+                        colspan="2"
+                      >
+                        All Users
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody></tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+          <div class="container-fluid">
+            <div class="row justify-content-end mt-3 mr-5">
+              <div class="col">
+                <textarea class="form-control" id="message" rows="5"></textarea>
+              </div>
+            </div>
+            <div class="row justify-content-md-end mt-3 mr-5">
+              <div class="col-4">
+                <button id="sendMessage" class="btn btn-primary btn-block">
+                  Send
+                </button>
+              </div>
+            </div>
           </div>
         </div>
       </div>
     </div>
 
     <script>
-      $("#sendMessage").click(function () {
-        let message = $("#message").val();
-        connection
-          .invoke("SendMessage", message)
-          .then(() => $("#message").val(""))
-          .catch((err) => console.log(err));
+      $(document).ready(function () {
+        let toSign = true;
+
+        $("#signInButton").click(function () {
+          if (toSign) {
+            $("#headerLabel").text("Sign In");
+            $("#loginButton").css("display", "none");
+            toSign = false;
+          } else {
+            $.ajax({
+              type: "POST",
+              url: "/api/Auth/SignIn",
+              contentType: "application/json; charset=utf-8",
+              dataType: "json",
+              data: JSON.stringify({
+                Username: $("#usernameInput").val(),
+                Password: $("#passwordInput").val(),
+              }),
+              success: () => {
+                executeAfterSuccessfulSignIn();
+              },
+              error: function (xhr, status, error) {
+                if (Number(xhr.status) < 200 || Number(xhr.status) > 200) {
+                  var errorMessage = xhr.status + ": " + xhr.statusText;
+                  alert("Error - " + errorMessage);
+                } else {
+                  executeAfterSuccessfulSignIn();
+                }
+              },
+            });
+          }
+        });
+
+        executeAfterSuccessfulSignIn = () => {
+          alert("Signed !");
+          $("#headerLabel").text("Login");
+          $("#loginButton").css("display", "block");
+          $("#signInButton").css("display", "none");
+        };
+
+        $("#loginButton").click(function () {
+          $.ajax({
+            type: "POST",
+            url: "/api/Auth/LogIn",
+            contentType: "application/json; charset=utf-8",
+            dataType: "json",
+            data: JSON.stringify({
+              Username: $("#usernameInput").val(),
+              Password: $("#passwordInput").val(),
+            }),
+            success: (response) => {
+              ME = $("#usernameInput").val();
+              executeAfterSuccessfulLogIn(response);
+            },
+            error: function (xhr, status, error) {
+              if (Number(xhr.status) < 200 || Number(xhr.status) > 200) {
+                var errorMessage = xhr.status + ": " + xhr.statusText;
+                alert("Error - " + errorMessage);
+              } else {
+                console.log(xhr.response);
+                executeAfterSuccessfulLogIn(xhr.response);
+              }
+            },
+          });
+        });
+
+        executeAfterSuccessfulLogIn = (response) => {
+          if (response.isAuthenticated) {
+            localStorage.setItem("accessToken", response.token);
+
+            $("#forms").css("display", "none");
+            $("#onlineUsers").css("display", "block");
+            $("#messagePanel").css("display", "block");
+
+            // CONNECT SIGNALR
+            start();
+          }
+        };
+
+        executeAfterSuccessfulGettingUsers = (response) => {
+          let onlineUsers = $("#onlineUsersUl");
+
+          response.forEach((user) => {
+            onlineUsers.append(
+              `<a id="${user}" class="list-group-item list-group-item-action">
+                ${user}
+              </a>`
+            );
+            connectedUsers.push(user);
+
+            $("#messages").append(createTable(user));
+          });
+        };
+
+        $(document).on("click", "ul > a", function (e) {
+          $(`#${targetUser}`).removeClass("active");
+          $(`#${targetUser}-messages`).parent().css("display", "none");
+
+          targetUser = e.target.id;
+
+          $(`#${e.target.id}`).addClass("active");
+          $(`#${targetUser}-messages`).parent().css("display", "block");
+          $("#userInChat").text(
+            targetUser === ALL_USERS ? "All Users" : targetUser
+          );
+        });
+
+        $("#sendMessage").click(function () {
+          let message = $("#message").val();
+          let invokedMethod =
+            targetUser === ALL_USERS
+              ? "SendMessageToAllUser"
+              : "SendPrivateMessage";
+
+          $("#message").val("");
+
+          connection
+            .invoke(invokedMethod, {
+              Message: message,
+              ReceiverUser: targetUser,
+            })
+            .then(() => {})
+            .catch((err) => console.log(err));
+        });
       });
     </script>
   </body>

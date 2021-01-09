@@ -68,7 +68,7 @@ namespace MessagingService.Service
                 Subject = new ClaimsIdentity(new[]
                 {
                     new Claim("userId", user.Id.ToString()),
-                    new Claim(ClaimTypes.Name, user.Username)
+                    new Claim(ClaimTypes.NameIdentifier, user.Username)
                 }),
 
                 Audience = _settings.Audience,

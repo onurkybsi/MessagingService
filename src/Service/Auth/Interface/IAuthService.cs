@@ -5,6 +5,6 @@ namespace MessagingService.Service
 {
     public interface IAuthService
     {
-        Task<AuthResult> Authenticate(ILoginModel user);
+        Task<AuthResult> Authenticate(ILoginModel login);
     }
 }
