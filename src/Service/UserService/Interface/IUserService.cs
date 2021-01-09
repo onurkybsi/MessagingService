@@ -11,5 +11,6 @@ namespace MessagingService.Service
         Task<User> GetUser(Expression<Func<User, bool>> filter);
         Task<List<User>> GetUsers(Expression<Func<User, bool>> filter);
         Task CreateUser(User user);
+        Task UpdateUser(User user);
     }
 }

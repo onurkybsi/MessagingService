@@ -1,9 +1,10 @@
+using System.Threading.Tasks;
 using MessagingService.Model;
 
 namespace MessagingService.Service
 {
     public interface IAuthService
     {
-        AuthResult Authenticate(ILoginModel user);
+        Task<AuthResult> Authenticate(ILoginModel user);
     }
 }
