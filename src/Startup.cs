@@ -1,9 +1,11 @@
 using System;
 using System.IO;
+using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using MessagingService.Data;
 using MessagingService.Hubs;
+using MessagingService.Infrastructure;
 using MessagingService.Model;
 using MessagingService.Service;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -34,7 +36,9 @@ namespace MessagingService
 
             services.AddCors(o => o.AddPolicy("MessagingServicePolicy", builder =>
             {
-                builder.WithOrigins(Configuration["ALLOWED_ORIGINS"])
+                string[] allowedOrigins = Configuration.GetSection("ALLOWED_ORIGINS").Get<string[]>();
+
+                builder.WithOrigins(allowedOrigins)
                     .AllowAnyMethod()
                     .AllowAnyHeader()
                     .AllowCredentials();
@@ -60,6 +64,9 @@ namespace MessagingService
 
             app.UseRouting();
             app.UseCors("MessagingServicePolicy");
+
+            app.UseAuthentication();
+            app.UseAuthorization();
 
             app.UseEndpoints(endpoints =>
             {
@@ -111,8 +118,14 @@ namespace MessagingService
 
         private void ConfigureRepositories(IServiceCollection services)
         {
-            services.AddSingleton<IUserRepository, UserRepository>();
-            services.AddSingleton<IMessageRepository, MessageRepository>();
+            MongoDBSettings messagingServiceDbSettings = new MongoDBSettings
+            {
+                ConnectionString = Configuration["MessagingServiceDb:ConnectionString"],
+                DatabaseName = Configuration["MessagingServiceDb:DatabaseName"],
+            };
+
+            services.AddSingleton<IUserRepository>(ur => new UserRepository(new MongoDBCollectionSettings { DatabaseSettings = messagingServiceDbSettings, CollectionName = "user" }));
+            services.AddSingleton<IMessageRepository>(mr => new MessageRepository(new MongoDBCollectionSettings { DatabaseSettings = messagingServiceDbSettings, CollectionName = "messsage" }));
         }
 
         private void ConfigureBusinessServices(IServiceCollection services)
