@@ -5,7 +5,7 @@ namespace MessagingService.Model
     public interface ILoginModel
     {
         [Required]
-        string Email { get; set; }
+        string Username { get; set; }
         [Required]
         string Password { get; set; }
     }

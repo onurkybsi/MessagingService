@@ -2,7 +2,7 @@ namespace MessagingService.Model
 {
     public class AuthResult
     {
-        public bool IsSuccess { get; set; }
+        public bool IsAuthenticated { get; set; }
         public string Token { get; set; }
     }
 }

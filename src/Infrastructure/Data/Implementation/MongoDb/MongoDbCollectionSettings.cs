@@ -1,8 +1,8 @@
 namespace MessagingService.Infrastructure
 {
-    public class MongoDbCollectionSettings : IRepositorySettings<MongoDbSettings>
+    public class MongoDBCollectionSettings : IRepositorySettings<MongoDBSettings>
     {
-        public MongoDbSettings DatabaseSettings { get; set; }
+        public MongoDBSettings DatabaseSettings { get; set; }
         public string CollectionName { get; set; }
     }
 }
