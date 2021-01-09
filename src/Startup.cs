@@ -2,8 +2,10 @@ using System;
 using System.IO;
 using System.Text;
 using System.Threading.Tasks;
+using MessagingService.Data;
 using MessagingService.Hubs;
 using MessagingService.Model;
+using MessagingService.Service;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -27,6 +29,8 @@ namespace MessagingService
         public void ConfigureServices(IServiceCollection services)
         {
             ConfigureAuth(services);
+            ConfigureRepositories(services);
+            ConfigureBusinessServices(services);
 
             services.AddCors(o => o.AddPolicy("MessagingServicePolicy", builder =>
             {
@@ -103,6 +107,19 @@ namespace MessagingService
                 });
 
             services.Configure<JwtAuthSettings>(options => Configuration.GetSection("JwtAuthSettings").Bind(options));
+        }
+
+        private void ConfigureRepositories(IServiceCollection services)
+        {
+            services.AddSingleton<IUserRepository, UserRepository>();
+            services.AddSingleton<IMessageRepository, MessageRepository>();
+        }
+
+        private void ConfigureBusinessServices(IServiceCollection services)
+        {
+            services.AddSingleton<IUserService, UserService>();
+            services.AddSingleton<IMessageService, MessageService>();
+            services.AddSingleton<IAuthService, JwtAuthService>();
         }
     }
 }
