@@ -1,6 +1,5 @@
 using System;
 using System.IO;
-using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using MessagingService.Data;
@@ -17,6 +16,7 @@ using Microsoft.Extensions.FileProviders;
 using Microsoft.Extensions.Hosting;
 using Microsoft.IdentityModel.Tokens;
 using Serilog;
+using EnvironmentName = Microsoft.Extensions.Hosting.EnvironmentName;
 
 namespace MessagingService
 {
@@ -90,8 +90,8 @@ namespace MessagingService
                     options.SaveToken = true;
                     options.TokenValidationParameters = new TokenValidationParameters
                     {
-                        ValidateAudience = false,
-                        ValidateIssuer = false,
+                        ValidateAudience = Configuration.GetAspNetCoreEnvironmentName() != EnvironmentName.Development,
+                        ValidateIssuer = Configuration.GetAspNetCoreEnvironmentName() != EnvironmentName.Development,
                         ValidateLifetime = true,
                         ValidateIssuerSigningKey = true,
                         ValidIssuer = Configuration["JwtAuthSettings:Issuer"],
@@ -115,8 +115,6 @@ namespace MessagingService
                         }
                     };
                 });
-
-            services.Configure<JwtAuthSettings>(options => Configuration.GetSection("JwtAuthSettings").Bind(options));
         }
 
         private void ConfigureRepositories(IServiceCollection services)
@@ -135,7 +133,12 @@ namespace MessagingService
         {
             services.AddSingleton<IUserService, UserService>();
             services.AddSingleton<IMessageService, MessageService>();
-            services.AddSingleton<IAuthService, JwtAuthService>();
+            services.AddSingleton<IAuthService>(auth => new JwtAuthService(new JwtAuthSettings
+            {
+                Issuer = Configuration["JwtAuthSettings:Issuer"],
+                Audience = Configuration["JwtAuthSettings:Audience"],
+                SecurityKey = Configuration["JwtAuthSettings:SecurityKey"]
+            }, auth.GetRequiredService<IUserService>()));
         }
     }
 }

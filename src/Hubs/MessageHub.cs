@@ -21,20 +21,21 @@ namespace MessagingService.Hubs
             _messageService = messageService;
         }
 
-        public async Task SendMessageToAllUser(SentMesage sentMesage)
+        public async Task SendMessage(SentMesage sentMesage)
         {
-            var message = new Message { MessageContent = sentMesage.Message, SenderUsername = Context.UserIdentifier };
+            var message = new Message { Content = sentMesage.Message, SenderUsername = Context.UserIdentifier, ReceiverUsername = sentMesage.ReceiverUser };
 
-            await Clients.All.ReceiveMessage(message);
+            await Clients.Users(Context.UserIdentifier, sentMesage.ReceiverUser).ReceiveMessage(message);
 
             await _messageService.SaveMessage(message);
         }
 
-        public async Task SendPrivateMessage(SentMesage sentMesage)
+        [Authorize(Roles = Constants.MessageHub.Role.Admin)]
+        public async Task SendMessageToAllUser(SentMesage sentMesage)
         {
-            var message = new Message { MessageContent = sentMesage.Message, SenderUsername = Context.UserIdentifier, ReceiverUsername = sentMesage.ReceiverUser };
+            var message = new Message { Content = sentMesage.Message, SenderUsername = Context.UserIdentifier, ReceiverUsername = Constants.MessageHub.AllUser };
 
-            await Clients.Users(Context.UserIdentifier, sentMesage.ReceiverUser).ReceiveMessage(message);
+            await Clients.All.ReceiveMessage(message);
 
             await _messageService.SaveMessage(message);
         }

@@ -1,6 +1,7 @@
 using System;
 using System.IO;
 using MessagingService.Infrastructure;
+using MessagingService.Service;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Hosting;
@@ -23,6 +24,8 @@ namespace MessagingService
 
             var host = CreateHostBuilder(args, configuration).Build();
 
+            CreateAdmin(host.Services.GetService(typeof(IUserService)) as IUserService, configuration);
+
             host.Run();
         }
 
@@ -34,5 +37,15 @@ namespace MessagingService
                     webBuilder.UseKestrel();
                     webBuilder.UseStartup<Startup>();
                 }).ConfigureLogging(config => config.ClearProviders()).UseSerilog();
+
+        private static void CreateAdmin(IUserService userService, IConfiguration configuration)
+        {
+            userService.CreateUser(new Model.User
+            {
+                Username = configuration["AdminInfo:Username"],
+                HashedPassword = Service.EncryptionHelper.CreateHashed(configuration["AdminInfo:Password"]),
+                Role = Model.Constants.MessageHub.Role.Admin
+            });
+        }
     }
 }
