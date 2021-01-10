@@ -4,7 +4,7 @@ namespace MessagingService.Model
     {
         public static class MessageHub
         {
-            public const string AllUser = "AllUser";
+            public const string AllUsers = "AllUsers";
             public static class Role
             {
                 public const string Admin = "Admin";

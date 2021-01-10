@@ -27,5 +27,8 @@ namespace MessagingService.Service
 
         public async Task UpdateUser(User user)
             => await _userRepository.Update(user);
+
+        public async Task<bool> IsAdmin(string userName)
+            => (await _userRepository.Get(u => u.Username == userName && u.Role == Constants.MessageHub.Role.Admin)) != null;
     }
 }

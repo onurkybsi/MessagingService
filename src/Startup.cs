@@ -37,7 +37,7 @@ namespace MessagingService
 
             services.AddCors(o => o.AddPolicy("MessagingServicePolicy", builder =>
             {
-                string[] allowedOrigins = Configuration.GetSection("ALLOWED_ORIGINS").Get<string[]>();
+                string[] allowedOrigins = Configuration.GetSection("AllowedOrigin").Get<string[]>();
 
                 builder.WithOrigins(allowedOrigins)
                     .AllowAnyMethod()
@@ -86,7 +86,7 @@ namespace MessagingService
                 options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
             }).AddJwtBearer(options =>
                 {
-                    options.RequireHttpsMetadata = false;
+                    options.RequireHttpsMetadata = Configuration.GetAspNetCoreEnvironmentName() != EnvironmentName.Development;
                     options.SaveToken = true;
                     options.TokenValidationParameters = new TokenValidationParameters
                     {
@@ -94,9 +94,9 @@ namespace MessagingService
                         ValidateIssuer = Configuration.GetAspNetCoreEnvironmentName() != EnvironmentName.Development,
                         ValidateLifetime = true,
                         ValidateIssuerSigningKey = true,
-                        ValidIssuer = Configuration["JwtAuthSettings:Issuer"],
-                        ValidAudience = Configuration["JwtAuthSettings:Audience"],
-                        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(Configuration["JwtAuthSettings:SecurityKey"])),
+                        ValidIssuer = Configuration["JwtAuthSettings_Issuer"],
+                        ValidAudience = Configuration["JwtAuthSettings_Audience"],
+                        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(Configuration["JwtAuthSettings_SecurityKey"])),
                         ClockSkew = TimeSpan.Zero
                     };
 
@@ -112,7 +112,13 @@ namespace MessagingService
                                 context.Token = accessToken;
                             }
                             return Task.CompletedTask;
-                        }
+                        },
+
+                        OnAuthenticationFailed = context =>
+                        {
+                            Log.Error($"Authentication was refused !: {context.Exception.Message}");
+                            return Task.CompletedTask;
+                        },
                     };
                 });
         }
@@ -121,8 +127,8 @@ namespace MessagingService
         {
             MongoDBSettings messagingServiceDbSettings = new MongoDBSettings
             {
-                ConnectionString = Configuration["MessagingServiceDb:ConnectionString"],
-                DatabaseName = Configuration["MessagingServiceDb:DatabaseName"],
+                ConnectionString = Configuration["MessagingServiceDb_ConnectionString"],
+                DatabaseName = Configuration["MessagingServiceDb_DatabaseName"]
             };
 
             services.AddSingleton<IUserRepository>(ur => new UserRepository(new MongoDBCollectionSettings { DatabaseSettings = messagingServiceDbSettings, CollectionName = "user" }));
@@ -135,9 +141,9 @@ namespace MessagingService
             services.AddSingleton<IMessageService, MessageService>();
             services.AddSingleton<IAuthService>(auth => new JwtAuthService(new JwtAuthSettings
             {
-                Issuer = Configuration["JwtAuthSettings:Issuer"],
-                Audience = Configuration["JwtAuthSettings:Audience"],
-                SecurityKey = Configuration["JwtAuthSettings:SecurityKey"]
+                Issuer = Configuration["JwtAuthSettings_Issuer"],
+                Audience = Configuration["JwtAuthSettings_Audience"],
+                SecurityKey = Configuration["JwtAuthSettings_SecurityKey"]
             }, auth.GetRequiredService<IUserService>()));
         }
     }

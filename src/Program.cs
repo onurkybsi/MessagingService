@@ -19,7 +19,7 @@ namespace MessagingService
             Log.Logger = InitialHelper.CreateELKLogger(new ELKLoggerConfig
             {
                 AppName = configuration["ASPNETCORE_APPLICATIONNAME"],
-                ElasticsearchURL = configuration["ELASTICSEARCH_URL"]
+                ElasticsearchURL = configuration["ElasticsearchUrl"]
             });
 
             var host = CreateHostBuilder(args, configuration).Build();

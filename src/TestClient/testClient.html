@@ -15,6 +15,15 @@
         top: 0;
       }
 
+      .fixedDiv {
+        display: block;
+        width: 100%;
+        height: 400px;
+        overflow: scroll;
+        overflow-x: hidden;
+        padding: 1%;
+      }
+
       /* Just common table stuff. Really. */
       table {
         border-collapse: collapse;
@@ -54,27 +63,26 @@
     <script src="https://use.fontawesome.com/68eb97251d.js"></script>
 
     <script>
-      const ALL_USERS = "ALL_USERS";
-      let targetUser = ALL_USERS;
-      let connectedUsers = [];
+      const AllUsers = "AllUsers";
+      let targetUser = undefined;
+      let myFriends = [];
       let ME = undefined;
 
-      let createTable = (tableName) => {
+      let createTable = (username) => {
         return `<div class="tableFixHead" style="display: none">
-                <table id="${tableName}-messages">
+                <table id="${username}-messages">
                   <thead>
                     <tr>
                       <th
-                        id="userInChat"
+                        id=${username}
                         style="text-align: center"
                         colspan="2"
                       >
-                        ${tableName}
+                        ${username}
                       </th>
                     </tr>
                   </thead>
                   <tbody>
-                    
                   </tbody>
                 </table>
               </div>`;
@@ -87,72 +95,43 @@
       const connection = new signalR.HubConnectionBuilder()
         .withUrl("/messagehub", {
           accessTokenFactory: () =>
-            localStorage.getItem("accessToken") != null
-              ? localStorage.getItem("accessToken")
+            localStorage.getItem("access_token") != null
+              ? localStorage.getItem("access_token")
               : "",
         })
         .build();
 
       connection.on("ReceiveMessage", (Message) => {
-        let tableName = undefined;
-        if (Message.senderUsername === ME) {
-          tableName = Message.receiverUserName;
-        } else if (Message.receiverUserName === ALL_USERS) {
-          tableName = ALL_USERS;
-        } else {
-          tableName = Message.senderUsername;
-        }
+        let tableName =
+          Message.senderUsername === ME
+            ? Message.receiverUsername
+            : Message.senderUsername;
 
         let messageLocation = Message.senderUsername === ME ? "right" : "left";
 
-        let messageContent = `<tr>
-                      <td style="width: 20%">${Message.timeToSend}</td>
-                      <td style="float: ${messageLocation};">${Message.messageContent}</td>
-                    </tr>`;
-        $(`#${tableName}-messages > tbody:last-child`).append(messageContent);
-      });
+        if (myFriends.indexOf(tableName) === -1) {
+          let friendUsersList = $("#friendUsersList");
 
-      connection.on("HandleConnectedUserChange", (user) => {
-        if (user === ME) return;
-
-        let userIndex = connectedUsers.findIndex(
-          (connectedUser) => connectedUser === user
-        );
-        let onlineUsers = $("#onlineUsersUl");
-        if (userIndex === -1) {
-          onlineUsers.append(
-            `<a id="${user}" class="list-group-item list-group-item-action">
-                ${user}
+          friendUsersList.append(
+            `<a id="${tableName}" class="list-group-item list-group-item-action">
+                ${tableName}
               </a>`
           );
-          connectedUsers.push(user);
-        } else {
-          $(`#${user}`).remove();
-          connectedUsers.splice(userIndex, 1);
+          $("#messages").append(createTable(tableName));
+          myFriends.push(tableName);
         }
+
+        let messageContent = `<tr>
+                      <td style="width: 20%">${Message.timeToSend}</td>
+                      <td style="float: ${messageLocation};">${Message.content}</td>
+                    </tr>`;
+        $(`#${tableName}-messages > tbody:last-child`).append(messageContent);
       });
 
       async function start() {
         try {
           await connection.start();
           console.log("SignalR Connected.");
-          $.ajax({
-            type: "GET",
-            url: "/api/MessageHubInfo/GetConnectedUsernames",
-            contentType: "application/json; charset=utf-8",
-            headers: {
-              Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
-            },
-            success: (data) => executeAfterSuccessfulGettingUsers(data),
-            error: function (xhr, status, error) {
-              if (Number(xhr.status) < 200 || Number(xhr.status) > 200) {
-                var errorMessage = xhr.status + ": " + xhr.statusText;
-                alert("Error - " + errorMessage);
-              } else {
-                executeAfterSuccessfulGettingUsers(xhr.response);
-              }
-            },
-          });
         } catch (err) {
           console.log(err);
           setTimeout(start, 5000);
@@ -192,7 +171,7 @@
             Sign In
           </button>
         </div>
-        <div id="onlineUsers" class="col-4" style="display: none">
+        <div id="friendUsers" class="col-4" style="display: none">
           <div class="row">
             <i
               class="fa fa-users fa-5"
@@ -203,39 +182,29 @@
               "
               aria-hidden="true"
             ></i>
-            <h1 id="headerLabel" class="display-4">Online Users</h1>
+            <h1 id="headerLabel" class="display-4">Friends</h1>
           </div>
           <div class="row mt-3 ml-5">
-            <ul id="onlineUsersUl" class="list-group w-75">
-              <a
-                id="ALL_USERS"
-                class="list-group-item list-group-item-action active"
-              >
-                All Users
-              </a>
-            </ul>
+            <div id="friendUsersList" class="fixedDiv"></div>
+            <div class="container">
+              <div class="row">
+                <input
+                  id="friendName"
+                  class="form-control"
+                  placeholder="Its my friend"
+                />
+              </div>
+              <div class="row justify-content-end mt-2">
+                <button id="addFriend" class="btn btn-primary float-right">
+                  Add Friend
+                </button>
+              </div>
+            </div>
           </div>
         </div>
         <div id="messagePanel" class="col-8" style="display: none">
           <div class="row">
-            <div id="messages" class="col">
-              <div class="tableFixHead" style="display: block">
-                <table id="ALL_USERS-messages">
-                  <thead>
-                    <tr>
-                      <th
-                        id="userInChat"
-                        style="text-align: center"
-                        colspan="2"
-                      >
-                        All Users
-                      </th>
-                    </tr>
-                  </thead>
-                  <tbody></tbody>
-                </table>
-              </div>
-            </div>
+            <div id="messages" class="col"></div>
           </div>
           <div class="container-fluid">
             <div class="row justify-content-end mt-3 mr-5">
@@ -324,49 +293,55 @@
 
         executeAfterSuccessfulLogIn = (response) => {
           if (response.isAuthenticated) {
-            localStorage.setItem("accessToken", response.token);
+            localStorage.setItem("access_token", response.token);
 
             $("#forms").css("display", "none");
-            $("#onlineUsers").css("display", "block");
-            $("#messagePanel").css("display", "block");
+            $("#friendUsers").css("display", "block");
 
             // CONNECT SIGNALR
             start();
           }
         };
 
-        executeAfterSuccessfulGettingUsers = (response) => {
-          let onlineUsers = $("#onlineUsersUl");
+        $("#addFriend").click(function (e) {
+          let friendUsersList = $("#friendUsersList");
+          let friendName = $("#friendName").val();
 
-          response.forEach((user) => {
-            onlineUsers.append(
-              `<a id="${user}" class="list-group-item list-group-item-action">
-                ${user}
+          friendUsersList.append(
+            `<a id="${friendName}" class="list-group-item list-group-item-action">
+                ${friendName}
               </a>`
-            );
-            connectedUsers.push(user);
-
-            $("#messages").append(createTable(user));
-          });
-        };
-
-        $(document).on("click", "ul > a", function (e) {
-          $(`#${targetUser}`).removeClass("active");
-          $(`#${targetUser}-messages`).parent().css("display", "none");
-
-          targetUser = e.target.id;
-
-          $(`#${e.target.id}`).addClass("active");
-          $(`#${targetUser}-messages`).parent().css("display", "block");
-          $("#userInChat").text(
-            targetUser === ALL_USERS ? "All Users" : targetUser
           );
+          $("#messages").append(createTable(friendName));
+          myFriends.push(friendName);
+
+          $("#friendName").val("");
+        });
+
+        $(document).on("click", "#friendUsersList > a", function (e) {
+          if (targetUser !== undefined) {
+            $(`#${targetUser}`).removeClass("active");
+            $(`#${targetUser}-messages`).parent().css("display", "none");
+
+            targetUser = e.target.id;
+
+            $(`#${e.target.id}`).addClass("active");
+            $(`#${targetUser}-messages`).parent().css("display", "block");
+          } else {
+            targetUser = e.target.id;
+            $(`#${e.target.id}`).addClass("active");
+            $(`#${targetUser}-messages`).parent().css("display", "block");
+          }
+
+          if ($("#messagePanel").css("display") !== "block") {
+            $("#messagePanel").css("display", "block");
+          }
         });
 
         $("#sendMessage").click(function () {
           let message = $("#message").val();
           let invokedMethod =
-            targetUser === ALL_USERS
+            targetUser === AllUsers
               ? "SendMessageToAllUser"
               : "SendPrivateMessage";
 
@@ -377,8 +352,12 @@
               Message: message,
               ReceiverUser: targetUser,
             })
-            .then(() => {})
-            .catch((err) => console.log(err));
+            .then((res) => {
+              console.log(res);
+            })
+            .catch((err) => {
+              console.log(err);
+            });
         });
       });
     </script>

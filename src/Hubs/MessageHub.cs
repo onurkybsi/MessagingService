@@ -14,26 +14,28 @@ namespace MessagingService.Hubs
     {
         private readonly ILogger<MessageHub> _logger;
         private readonly IMessageService _messageService;
+        private readonly IUserService _userService;
 
-        public MessageHub(ILogger<MessageHub> logger, IMessageService messageService)
+        public MessageHub(ILogger<MessageHub> logger, IMessageService messageService, IUserService userService)
         {
             _logger = logger;
             _messageService = messageService;
+            _userService = userService;
         }
 
-        public async Task SendMessage(SentMesage sentMesage)
+        public async Task SendPrivateMessage(SentMesage sentMessage)
         {
-            var message = new Message { Content = sentMesage.Message, SenderUsername = Context.UserIdentifier, ReceiverUsername = sentMesage.ReceiverUser };
+            var message = new Message { Content = sentMessage.Message, SenderUsername = Context.UserIdentifier, ReceiverUsername = sentMessage.ReceiverUser };
 
-            await Clients.Users(Context.UserIdentifier, sentMesage.ReceiverUser).ReceiveMessage(message);
+            await Clients.Users(Context.UserIdentifier, sentMessage.ReceiverUser).ReceiveMessage(message);
 
             await _messageService.SaveMessage(message);
         }
 
         [Authorize(Roles = Constants.MessageHub.Role.Admin)]
-        public async Task SendMessageToAllUser(SentMesage sentMesage)
+        public async Task SendMessageToAllUser(SentMesage sentMessage)
         {
-            var message = new Message { Content = sentMesage.Message, SenderUsername = Context.UserIdentifier, ReceiverUsername = Constants.MessageHub.AllUser };
+            var message = new Message { Content = sentMessage.Message, SenderUsername = Context.UserIdentifier, ReceiverUsername = Constants.MessageHub.AllUsers };
 
             await Clients.All.ReceiveMessage(message);
 
@@ -42,25 +44,33 @@ namespace MessagingService.Hubs
 
         public async override Task OnConnectedAsync()
         {
-            MessageHubState.Usernames.Add(Context.UserIdentifier);
-            await Clients.All.HandleConnectedUserChange(Context.UserIdentifier);
-            _logger.LogInformation($"{Context.UserIdentifier} connected !");
+            string connectedUserName = Context.UserIdentifier;
 
             await base.OnConnectedAsync();
+
+            MessageHubState.ConnectedUsernames.Add(connectedUserName);
+            _logger.LogInformation($"{connectedUserName} connected !");
+
+            if (await _userService.IsAdmin(connectedUserName))
+                MessageHubState.ConnectedAdminUsernames.Add(connectedUserName);
         }
 
         public async override Task OnDisconnectedAsync(Exception exception)
         {
-            MessageHubState.Usernames.Remove(Context.UserIdentifier);
-            await Clients.All.HandleConnectedUserChange(Context.UserIdentifier);
-            _logger.LogInformation($"{Context.UserIdentifier} disconnected !");
-
+            string disconnectedUserName = Context.UserIdentifier;
             await base.OnDisconnectedAsync(exception);
+
+            MessageHubState.ConnectedUsernames.Remove(disconnectedUserName);
+            _logger.LogInformation($"{disconnectedUserName} disconnected !");
+
+            if (MessageHubState.ConnectedAdminUsernames.Contains(disconnectedUserName))
+                MessageHubState.ConnectedAdminUsernames.Remove(disconnectedUserName);
         }
     }
 
     public static class MessageHubState
     {
-        public static List<string> Usernames = new List<string>();
+        public static HashSet<string> ConnectedUsernames = new HashSet<string>();
+        public static HashSet<string> ConnectedAdminUsernames = new HashSet<string>();
     }
 }

@@ -12,5 +12,6 @@ namespace MessagingService.Service
         Task<List<User>> GetUsers(Expression<Func<User, bool>> filter);
         Task CreateUser(User user);
         Task UpdateUser(User user);
+        Task<bool> IsAdmin(string userName);
     }
 }

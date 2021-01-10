@@ -7,17 +7,12 @@
       "applicationUrl": "https://localhost:5001;http://localhost:5000",
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development",
-        "ELASTICSEARCH_URL": "http://localhost:9200",
-        "MessagingServiceDb": {
-          "ConnectionString": "mongodb://localhost:27017",
-          "DatabaseName": "MessagingServiceDb"
-        },
-        "JwtAuthSettings": {
-          "Issuer": "http://localhost:5000",
-          "Audience": "www.bilmemne.com",
-          "SecurityKey": "SUxvdmVZb3VBbGV5bmFHdW5lcg=="
-        },
-        "ALLOWED_ORIGINS": ["http://localhost:5000"]
+        "ElasticsearchUrl": "http://localhost:9200",
+        "MessagingServiceDb_ConnectionString": "mongodb://localhost:27017",
+        "MessagingServiceDb_DatabaseName": "MessagingServiceDb",
+        "JwtAuthSettings_Issuer": "http://localhost:5000",
+        "JwtAuthSettings_Audience": "www.bilmemne.com",
+        "JwtAuthSettings_SecurityKey": "SUxvdmVZb3VBbGV5bmFHdW5lcg=="
       }
     }
   }

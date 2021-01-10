@@ -19,6 +19,6 @@ namespace MessagingService.Controllers
 
         [HttpGet]
         public IActionResult GetConnectedUsernames()
-            => Ok(MessageHubState.Usernames);
+            => Ok(MessageHubState.ConnectedUsernames);
     }
 }
