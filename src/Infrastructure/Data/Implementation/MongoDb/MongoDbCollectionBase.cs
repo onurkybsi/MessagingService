@@ -15,6 +15,7 @@ namespace MessagingService.Infrastructure
             var client = new MongoClient(collectionSettings.DatabaseSettings.ConnectionString);
             var database = client.GetDatabase(collectionSettings.DatabaseSettings.DatabaseName);
 
+
             _collection = database.GetCollection<T>(collectionSettings.CollectionName);
         }
 

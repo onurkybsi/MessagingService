@@ -1,14 +1,16 @@
 version: "3.4"
 services:
   elasticsearch:
-    image: docker.elastic.co/elasticsearch/elasticsearch:latest
+    image: docker.elastic.co/elasticsearch/elasticsearch:7.10.1
     ports:
       - "9200:9200"
       - "9300:9300"
     environment:
       discovery.type: "single-node"
+    # volumes: 
+    #   - /data/logs:/usr/share/elasticsearch/data
   kibana:
-    image: docker.elastic.co/kibana/kibana:latest
+    image: docker.elastic.co/kibana/kibana:7.10.1
     ports:
       - "5601:5601"
     depends_on:
@@ -22,13 +24,15 @@ services:
       MONGO_INITDB_DATABASE: messagingservicedb
       MONGO_INITDB_ROOT_USERNAME: admin
       MONGO_INITDB_ROOT_PASSWORD: admin
-    volumes:
-      - ./init-mongo.js:/docker-entrypoint-initdb.d/init-mongo.js:ro
+    # volumes:
+    #   - /data/messagingservicedb:/data/db
   messagingservice:
     build: ./src
     ports:
-      - "5000:5000"
+      - "5000:80"
     env_file:
       - ./src/.env
-    depends_on:
+    depends_on: 
+      - messagingservicedb
+      - elasticsearch
       - kibana

@@ -126,6 +126,9 @@
                       <td style="float: ${messageLocation};">${Message.content}</td>
                     </tr>`;
         $(`#${tableName}-messages > tbody:last-child`).append(messageContent);
+
+        var $cont = $(".tableFixHead");
+        $cont[0].scrollTop = $cont[0].scrollHeight;
       });
 
       async function start() {
@@ -168,7 +171,7 @@
             Login
           </button>
           <button id="signInButton" class="btn btn-primary float-right mr-2">
-            Sign In
+            Sign Up
           </button>
         </div>
         <div id="friendUsers" class="col-4" style="display: none">
@@ -209,7 +212,12 @@
           <div class="container-fluid">
             <div class="row justify-content-end mt-3 mr-5">
               <div class="col">
-                <textarea class="form-control" id="message" rows="5"></textarea>
+                <textarea
+                  id="messageTextArea"
+                  class="form-control"
+                  id="message"
+                  rows="5"
+                ></textarea>
               </div>
             </div>
             <div class="row justify-content-md-end mt-3 mr-5">
@@ -230,7 +238,7 @@
 
         $("#signInButton").click(function () {
           if (toSign) {
-            $("#headerLabel").text("Sign In");
+            $("#headerLabel").text("Sign Up");
             $("#loginButton").css("display", "none");
             toSign = false;
           } else {
@@ -304,16 +312,18 @@
         };
 
         $("#addFriend").click(function (e) {
-          let friendUsersList = $("#friendUsersList");
-          let friendName = $("#friendName").val();
+          if (myFriends.indexOf(myFriends) === -1) {
+            let friendUsersList = $("#friendUsersList");
+            let friendName = $("#friendName").val();
 
-          friendUsersList.append(
-            `<a id="${friendName}" class="list-group-item list-group-item-action">
+            friendUsersList.append(
+              `<a id="${friendName}" class="list-group-item list-group-item-action">
                 ${friendName}
               </a>`
-          );
-          $("#messages").append(createTable(friendName));
-          myFriends.push(friendName);
+            );
+            $("#messages").append(createTable(friendName));
+            myFriends.push(friendName);
+          }
 
           $("#friendName").val("");
         });
@@ -345,7 +355,7 @@
               ? "SendMessageToAllUser"
               : "SendPrivateMessage";
 
-          $("#message").val("");
+          $("#messageTextArea").val("");
 
           connection
             .invoke(invokedMethod, {
@@ -359,6 +369,31 @@
               console.log(err);
             });
         });
+
+        $("#messageTextArea")
+          .keyup(function (e) {
+            if (e.keyCode == 13) {
+              let message = $("#messageTextArea").val();
+              $("#messageTextArea").val("");
+              let invokedMethod =
+                targetUser === AllUsers
+                  ? "SendMessageToAllUser"
+                  : "SendPrivateMessage";
+
+              connection
+                .invoke(invokedMethod, {
+                  Message: message,
+                  ReceiverUser: targetUser,
+                })
+                .then((res) => {
+                  console.log(res);
+                })
+                .catch((err) => {
+                  console.log(err);
+                });
+            }
+          })
+          .focus();
       });
     </script>
   </body>

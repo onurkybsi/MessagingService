@@ -73,8 +73,7 @@ namespace MessagingService.Service
 
                 Audience = _settings.Audience,
                 Issuer = _settings.Issuer,
-                Expires = DateTime.UtcNow.AddMinutes(0.5),
-                NotBefore = DateTime.Now,
+                Expires = DateTime.UtcNow.AddMinutes(30),
                 SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_settings.SecurityKey)), SecurityAlgorithms.HmacSha256Signature)
             };
 
