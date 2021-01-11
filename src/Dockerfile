@@ -1,15 +1,13 @@
-FROM mcr.microsoft.com/dotnet/sdk:5.0 AS build
-WORKDIR /src
+FROM mcr.microsoft.com/dotnet/core/sdk:3.1 AS build-env
+WORKDIR /app
 
-COPY ./*.csproj ./
+COPY *.csproj ./
 RUN dotnet restore
 
 COPY . ./
-WORKDIR /src
-RUN dotnet publish -c release -o /app --no-restore
+RUN dotnet publish -c Release -o out
 
-# final stage/image
-FROM mcr.microsoft.com/dotnet/aspnet:5.0
+FROM mcr.microsoft.com/dotnet/core/aspnet:3.1
 WORKDIR /app
-COPY --from=build /app ./
-ENTRYPOINT ["dotnet", "aspnetapp.dll"]
+COPY --from=build-env /app/out .
+ENTRYPOINT ["dotnet", "MessagingService.dll"]
