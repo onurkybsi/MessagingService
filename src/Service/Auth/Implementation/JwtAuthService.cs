@@ -26,7 +26,7 @@ namespace MessagingService.Service
                 return new AuthResult
                 {
                     IsAuthenticated = false,
-                    Message = "usernotexists"
+                    Message = Constants.ErrorMessages.UserNotExists
                 };
 
             if (!VerifyUser(login.Password, user.HashedPassword))
@@ -34,7 +34,7 @@ namespace MessagingService.Service
                 return new AuthResult
                 {
                     IsAuthenticated = false,
-                    Message = "passwordisnotcorrect"
+                    Message = Constants.ErrorMessages.PasswordIsNotCorrect
                 };
             }
 

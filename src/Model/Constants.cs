@@ -11,5 +11,11 @@ namespace MessagingService.Model
                 public const string User = "User";
             }
         }
+
+        public static class ErrorMessages
+        {
+            public const string UserNotExists = "UserNotExists";
+            public const string PasswordIsNotCorrect = "PasswordIsNotCorrect";
+        }
     }
 }
