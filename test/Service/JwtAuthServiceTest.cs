@@ -12,14 +12,14 @@ namespace MessageServiceTest
     {
         private readonly Mock<IUserService> UserServiceMock;
         private JwtAuthSettings JwtSettings;
-        private User TestUser = new User { Username = "testusername", HashedPassword = $"test{EncryptionHelper.SaltPointer}hashedpassword" };
+        private User TestUser = new User { Id = "testid", Username = "testusername", HashedPassword = EncryptionHelper.CreateHashed("testpassword"), Role = Constants.MessageHub.Role.User };
 
         public JwtAuthServiceTest()
         {
             UserServiceMock = new Mock<IUserService>();
             JwtSettings = new JwtAuthSettings
             {
-                SecurityKey = "SecurityKey",
+                SecurityKey = "minimumSixteenCharactersSecurityKey",
                 Issuer = "MessagingService",
                 Audience = "someclients"
             };
@@ -56,7 +56,8 @@ namespace MessageServiceTest
 
             var authService = new JwtAuthService(JwtSettings, UserServiceMock.Object);
 
-            var authResult = authService.Authenticate(new LoginModel{
+            var authResult = authService.Authenticate(new LoginModel
+            {
                 Username = "testusername",
                 Password = "incorrect"
             }).Result;
@@ -71,12 +72,63 @@ namespace MessageServiceTest
 
             var authService = new JwtAuthService(JwtSettings, UserServiceMock.Object);
 
-            var authResult = authService.Authenticate(new LoginModel{
+            var authResult = authService.Authenticate(new LoginModel
+            {
                 Username = "testusername",
                 Password = "incorrect"
             }).Result;
 
             Assert.Equal(authResult.Message, Constants.ErrorMessages.PasswordIsNotCorrect);
+        }
+
+        [Fact]
+        public void Authenticate_When_User_Defined_And_Password_Is_True_Then_User_BeUpdated_With_New_Token()
+        {
+            UserServiceMock.Setup(us => us.GetUser(It.IsAny<Expression<Func<User, bool>>>())).Returns(Task.FromResult(TestUser));
+
+            var authService = new JwtAuthService(JwtSettings, UserServiceMock.Object);
+
+            var authResult = authService.Authenticate(new LoginModel
+            {
+                Username = TestUser.Username,
+                Password = "testpassword"
+            }).Result;
+
+            TestUser.Token = authResult.Token;
+
+            UserServiceMock.Verify(us => us.UpdateUser(TestUser), Times.Once);
+        }
+
+        [Fact]
+        public void Authenticate_When_User_Defined_And_Password_Is_True_Returns_IsAuthenticated_True()
+        {
+            UserServiceMock.Setup(us => us.GetUser(It.IsAny<Expression<Func<User, bool>>>())).Returns(Task.FromResult(TestUser));
+
+            var authService = new JwtAuthService(JwtSettings, UserServiceMock.Object);
+
+            var authResult = authService.Authenticate(new LoginModel
+            {
+                Username = TestUser.Username,
+                Password = "testpassword"
+            }).Result;
+
+            Assert.True(authResult.IsAuthenticated);
+        }
+
+        [Fact]
+        public void Authenticate_When_User_Defined_And_Password_Is_True_Returns_Token()
+        {
+            UserServiceMock.Setup(us => us.GetUser(It.IsAny<Expression<Func<User, bool>>>())).Returns(Task.FromResult(TestUser));
+
+            var authService = new JwtAuthService(JwtSettings, UserServiceMock.Object);
+
+            var authResult = authService.Authenticate(new LoginModel
+            {
+                Username = TestUser.Username,
+                Password = "testpassword"
+            }).Result;
+
+            Assert.False(string.IsNullOrEmpty(authResult.Token));
         }
     }
 }
