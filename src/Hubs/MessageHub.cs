@@ -58,8 +58,8 @@ namespace MessagingService.Hubs
             if (await _userService.IsAdmin(connectedUserName))
                 MessageHubState.ConnectedAdminUsernames.Add(connectedUserName);
 
-            User connectedUser = await _userService.GetUser(u => u.Username == connectedUserName);
-            MessageHubState.BlockedUsersInfo.Add(connectedUserName, connectedUser.BlockedUsers);
+            HashSet<string> blockedUsers = await _userService.GetBlockedUsersOfUser(connectedUserName);
+            MessageHubState.BlockedUsersInfo.Add(connectedUserName, blockedUsers);
         }
 
         public async override Task OnDisconnectedAsync(Exception exception)
