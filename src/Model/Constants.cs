@@ -17,5 +17,10 @@ namespace MessagingService.Model
             public const string UserNotExists = "UserNotExists";
             public const string PasswordIsNotCorrect = "PasswordIsNotCorrect";
         }
+
+        public static class ValidationMessages
+        {
+            public const string UserAlreadyExists = "UserAlreadyExists";
+        }
     }
 }

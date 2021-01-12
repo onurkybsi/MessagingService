@@ -28,7 +28,6 @@ namespace MessagingService.Controllers
             if (string.IsNullOrEmpty(userName) || string.IsNullOrWhiteSpace(userName))
                 return BadRequest();
 
-
             return Ok(await _messageService.GetMessagesBetweenTwoUser(GetCurrentUsername(), userName));
         }
 

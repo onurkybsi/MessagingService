@@ -28,6 +28,10 @@ namespace MessagingService
         }
 
         public IConfiguration Configuration { get; }
+        public static IServiceProvider ServiceProvider { get; set; }
+
+        public static T GetInstance<T>()
+            => ServiceProvider.GetRequiredService<T>();
 
         public void ConfigureServices(IServiceCollection services)
         {
@@ -75,6 +79,7 @@ namespace MessagingService
                 endpoints.MapHub<MessageHub>("/messagehub");
             });
 
+            ServiceProvider = app.ApplicationServices;
             Log.ForContext<Startup>().Information("{Application} is listening on {Env}...", env.ApplicationName, env.EnvironmentName);
         }
 

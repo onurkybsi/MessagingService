@@ -19,18 +19,18 @@ namespace MessagingService.Infrastructure
                 .Enrich.WithProperty("Application", config.AppName)
                 .MinimumLevel.Override("Microsoft", LogEventLevel.Warning)
                 .MinimumLevel.Override("System", LogEventLevel.Warning)
-                .WriteTo.Console().MinimumLevel.Verbose().CreateLogger();
-                // .WriteTo.Elasticsearch(
-                //     new ElasticsearchSinkOptions(
-                //         new Uri(config.ElasticsearchURL))
-                //     {
-                //         CustomFormatter = new ExceptionAsObjectJsonFormatter(renderMessage: true),
-                //         AutoRegisterTemplate = true,
-                //         TemplateName = "serilog-events-template",
-                //         IndexFormat = string.Format("{0}-logs", config.AppName.ToLower())
-                //     })
-                // .MinimumLevel.Verbose()
-                // .CreateLogger();
+                .WriteTo.Console().MinimumLevel.Verbose()
+                .WriteTo.Elasticsearch(
+                    new ElasticsearchSinkOptions(
+                        new Uri(config.ElasticsearchURL))
+                    {
+                        CustomFormatter = new ExceptionAsObjectJsonFormatter(renderMessage: true),
+                        AutoRegisterTemplate = true,
+                        TemplateName = "serilog-events-template",
+                        IndexFormat = string.Format("{0}-logs", config.AppName.ToLower())
+                    })
+                .MinimumLevel.Verbose()
+                .CreateLogger();
         }
 
         public static IConfiguration GetConfiguration(string basePath, string environment)
