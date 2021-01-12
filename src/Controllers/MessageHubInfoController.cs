@@ -45,10 +45,10 @@ namespace MessagingService.Controllers
         {
             string currentUsername = GetCurrentUsername();
 
-            // Kullanıcı Hub a connect oldugunda blockedUser bilgileri state e giriliyor zaten. Burda sadece ekleme yapmalıyız
-            MessageHubState.BlockedUsersInfo.Where(bi => bi.Key == currentUsername).First().Value.Add(blockUserRequest.Username);
+            MessageHubState.BlockedUsersInfo.Where(bi => bi.Key == currentUsername).First().Value.Add(blockUserRequest.BlockedUsername);
 
-            // DB de güncellenecek
+            await _userService.UpdateByUsername(currentUsername, u => { u.BlockedUsers.Add(blockUserRequest.BlockedUsername); });
+            _logger.LogInformation($"{blockUserRequest.BlockedUsername} blocked by {currentUsername}");
 
             return Ok();
         }

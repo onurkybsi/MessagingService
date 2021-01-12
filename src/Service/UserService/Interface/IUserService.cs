@@ -12,6 +12,7 @@ namespace MessagingService.Service
         Task<List<User>> GetUsers(Expression<Func<User, bool>> filter);
         Task CreateUser(User user);
         Task UpdateUser(User user);
+        Task UpdateByUsername(string username, Action<User> updateDefinition);
         Task<bool> IsAdmin(string userName);
         Task<HashSet<string>> GetBlockedUsersOfUser(string username);
     }

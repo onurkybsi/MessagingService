@@ -30,6 +30,14 @@ namespace MessagingService.Infrastructure
         public Task Update(T entity)
             => string.IsNullOrEmpty(entity.Id) ? Task.CompletedTask : _collection.ReplaceOneAsync(e => e.Id == entity.Id, entity);
 
+        // It will be changed. This may not be optimal solution
+        public async Task FindAndUpdate(Expression<Func<T, bool>> filterDefinition, Action<T> updateDefinition)
+        {
+            T updatedEntity = (await _collection.FindAsync(new ExpressionFilterDefinition<T>(filterDefinition))).FirstOrDefault();
+            updateDefinition(updatedEntity);
+            await this.Update(updatedEntity);
+        }
+
         public Task Remove(T entity)
             => _collection.DeleteOneAsync(e => e.Id == entity.Id);
     }

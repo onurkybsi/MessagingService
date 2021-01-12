@@ -25,12 +25,18 @@ namespace MessagingService.Hubs
 
         public async Task SendPrivateMessage(SentMesage sentMessage)
         {
+            if (CheckSenderIsBlocked(sentMessage.ReceiverUser))
+                return;
+
             var message = new Message { Content = sentMessage.Message, SenderUsername = Context.UserIdentifier, ReceiverUsername = sentMessage.ReceiverUser };
 
             await Clients.Users(Context.UserIdentifier, sentMessage.ReceiverUser).ReceiveMessage(message);
 
             await _messageService.SaveMessage(message);
         }
+
+        private bool CheckSenderIsBlocked(string receiverUsername)
+            => MessageHubState.BlockedUsersInfo[receiverUsername].Contains(Context.UserIdentifier);
 
         [Authorize(Roles = Constants.MessageHub.Role.Admin)]
         public async Task SendMessageToAllUser(SentMesage sentMessage)
@@ -60,7 +66,6 @@ namespace MessagingService.Hubs
 
             HashSet<string> blockedUsers = await _userService.GetBlockedUsersOfUser(connectedUserName);
             MessageHubState.BlockedUsersInfo.Add(connectedUserName, blockedUsers);
-            // DB yede eklenecek
         }
 
         public async override Task OnDisconnectedAsync(Exception exception)

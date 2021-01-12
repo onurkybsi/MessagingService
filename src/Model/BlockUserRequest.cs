@@ -2,6 +2,6 @@ namespace MessagingService.Model
 {
     public class BlockUserRequest
     {
-        public string Username { get; set; }
+        public string BlockedUsername { get; set; }
     }
 }

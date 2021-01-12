@@ -11,6 +11,7 @@ namespace MessagingService.Infrastructure
         Task<List<T>> GetList(Expression<Func<T, bool>> filter = null);
         Task Create(T entity);
         Task Update(T entity);
+        Task FindAndUpdate(Expression<Func<T, bool>> filterDefinition, Action<T> updateDefinition);
         Task Remove(T entity);
     }
 }
