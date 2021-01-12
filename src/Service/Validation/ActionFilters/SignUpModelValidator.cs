@@ -68,7 +68,6 @@ namespace MessagingService.Service
             {
                 validationResult.IsValid = false;
                 validationResult.Message = Constants.ValidationMessages.PasswordMustBeMoreThanFourCharacters;
-                return;
             }
         }
 

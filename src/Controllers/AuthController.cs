@@ -62,7 +62,8 @@ namespace MessagingService.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> LogIn([FromBody] LoginModel login)
+        [LoginModelValidator]
+        public async Task<IActionResult> Login([FromBody] LoginModel login)
         {
             var loginResult = await _authService.Authenticate(login);
 
