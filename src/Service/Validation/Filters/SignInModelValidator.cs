@@ -18,12 +18,10 @@ namespace MessagingService.Service
             if (user != null)
             {
                 filterContext.HttpContext.Response.StatusCode = (int)HttpStatusCode.BadRequest;
-                filterContext.Result = new JsonResult(new { IsValid = false, Message = Constants.ValidationMessages.UserAlreadyExists });
+                filterContext.Result = new JsonResult(new ValidationResult { IsValid = false, Message = Constants.ValidationMessages.UserAlreadyExists });
             }
             else
-            {
-                await next();
-            }
+            { await next(); }
         }
     }
 }
