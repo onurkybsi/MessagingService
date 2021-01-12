@@ -23,8 +23,8 @@ namespace MessagingService.Controllers
         }
 
         [HttpPost]
-        [SignInModelValidator]
-        public async Task<IActionResult> SignIn([FromBody] SignInModel newUser)
+        [SignUpModelValidator]
+        public async Task<IActionResult> SignUp([FromBody] SignUpModel newUser)
         {
             string hashedPass = EncryptionHelper.CreateHashed(newUser.Password);
 
@@ -43,8 +43,8 @@ namespace MessagingService.Controllers
 
         [HttpPost]
         [Authorize(Roles = Constants.MessageHub.Role.Admin)]
-        [SignInModelValidator]
-        public async Task<IActionResult> SignInAsAdmin([FromBody] SignInModel newUser)
+        [SignUpModelValidator]
+        public async Task<IActionResult> SignUpAsAdmin([FromBody] SignUpModel newUser)
         {
             string hashedPass = EncryptionHelper.CreateHashed(newUser.Password);
 

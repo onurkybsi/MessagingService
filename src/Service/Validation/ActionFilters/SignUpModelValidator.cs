@@ -7,13 +7,13 @@ using Microsoft.AspNetCore.Mvc.Filters;
 
 namespace MessagingService.Service
 {
-    public class SignInModelValidator : ActionFilterAttribute
+    public class SignUpModelValidator : ActionFilterAttribute
     {
         public async override Task OnActionExecutionAsync(ActionExecutingContext filterContext, ActionExecutionDelegate next)
         {
-            SignInModel signInModel = filterContext.ActionArguments.Values.FirstOrDefault() as SignInModel;
+            SignUpModel signUpModel = filterContext.ActionArguments.Values.FirstOrDefault() as SignUpModel;
 
-            ValidationResult validationResult = await ValidateSignInModel(signInModel);
+            ValidationResult validationResult = await ValidateSignUpModel(signUpModel);
 
             if (!validationResult.IsValid)
             {
@@ -24,41 +24,41 @@ namespace MessagingService.Service
             { await next(); }
         }
 
-        private async Task<ValidationResult> ValidateSignInModel(SignInModel signInModel)
+        private async Task<ValidationResult> ValidateSignUpModel(SignUpModel signUpModel)
         {
             ValidationResult validationResult = new ValidationResult();
 
-            CheckHasDefaultValue(validationResult, signInModel);
+            CheckHasDefaultValue(validationResult, signUpModel);
             if (!validationResult.IsValid)
                 return validationResult;
 
-            CheckPasswordAvailability(validationResult, signInModel.Password);
+            CheckPasswordAvailability(validationResult, signUpModel.Password);
             if (!validationResult.IsValid)
                 return validationResult;
 
-            await CheckWhetherUserExist(validationResult, signInModel.Username);
+            await CheckWhetherUserExist(validationResult, signUpModel.Username);
             if (!validationResult.IsValid)
                 return validationResult;
 
             return validationResult;
         }
 
-        private void CheckHasDefaultValue(ValidationResult validationResult, SignInModel signInModel)
+        private void CheckHasDefaultValue(ValidationResult validationResult, SignUpModel signUpModel)
         {
-            if (signInModel is null)
+            if (signUpModel is null)
             {
                 validationResult.IsValid = false;
-                validationResult.Message = $"{Constants.ValidationMessages.ValueCanNotBeNull}: {nameof(SignInModel)}";
+                validationResult.Message = $"{Constants.ValidationMessages.ValueCanNotBeNull}: {nameof(SignUpModel)}";
             }
-            else if (string.IsNullOrEmpty(signInModel.Username) || string.IsNullOrWhiteSpace(signInModel.Username))
+            else if (string.IsNullOrEmpty(signUpModel.Username) || string.IsNullOrWhiteSpace(signUpModel.Username))
             {
                 validationResult.IsValid = false;
-                validationResult.Message = $"{Constants.ValidationMessages.StringCanNotBeNullEmptyOrWhiteSpace}: {nameof(signInModel.Username)}";
+                validationResult.Message = $"{Constants.ValidationMessages.StringCanNotBeNullEmptyOrWhiteSpace}: {nameof(SignUpModel.Username)}";
             }
-            else if (string.IsNullOrEmpty(signInModel.Password) || string.IsNullOrWhiteSpace(signInModel.Password))
+            else if (string.IsNullOrEmpty(signUpModel.Password) || string.IsNullOrWhiteSpace(signUpModel.Password))
             {
                 validationResult.IsValid = false;
-                validationResult.Message = $"{Constants.ValidationMessages.StringCanNotBeNullEmptyOrWhiteSpace}: {nameof(signInModel.Password)}";
+                validationResult.Message = $"{Constants.ValidationMessages.StringCanNotBeNullEmptyOrWhiteSpace}: {nameof(SignUpModel.Password)}";
             }
         }
 

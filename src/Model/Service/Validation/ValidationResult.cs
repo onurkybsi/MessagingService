@@ -1,4 +1,4 @@
-namespace MessagingService.Service
+namespace MessagingService.Model
 {
     public class ValidationResult
     {
