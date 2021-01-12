@@ -28,7 +28,7 @@ namespace MessagingService
         }
 
         public IConfiguration Configuration { get; }
-        public static IServiceProvider ServiceProvider { get; set; }
+        private static IServiceProvider ServiceProvider { get; set; }
 
         public static T GetInstance<T>()
             => ServiceProvider.GetRequiredService<T>();
