@@ -47,19 +47,30 @@ namespace MessagingService.Hubs
             string connectedUserName = Context.UserIdentifier;
 
             await base.OnConnectedAsync();
+            await UpdateMessageUpdateStateAfterConnection(connectedUserName);
+        }
 
+        private async Task UpdateMessageUpdateStateAfterConnection(string connectedUserName)
+        {
             MessageHubState.ConnectedUsernames.Add(connectedUserName);
             _logger.LogInformation($"{connectedUserName} connected !");
 
             if (await _userService.IsAdmin(connectedUserName))
                 MessageHubState.ConnectedAdminUsernames.Add(connectedUserName);
+
+            User connectedUser = await _userService.GetUser(u => u.Username == connectedUserName);
+            MessageHubState.BlockedUsersInfo.Add(connectedUserName, connectedUser.BlockedUsers);
         }
 
         public async override Task OnDisconnectedAsync(Exception exception)
         {
             string disconnectedUserName = Context.UserIdentifier;
             await base.OnDisconnectedAsync(exception);
+            await UpdateMessageUpdateStateAfterDisconnection(disconnectedUserName);
+        }
 
+        private async Task UpdateMessageUpdateStateAfterDisconnection(string disconnectedUserName)
+        {
             MessageHubState.ConnectedUsernames.Remove(disconnectedUserName);
             _logger.LogInformation($"{disconnectedUserName} disconnected !");
 
@@ -72,5 +83,6 @@ namespace MessagingService.Hubs
     {
         public static HashSet<string> ConnectedUsernames = new HashSet<string>();
         public static HashSet<string> ConnectedAdminUsernames = new HashSet<string>();
+        public static Dictionary<string, HashSet<string>> BlockedUsersInfo = new Dictionary<string, HashSet<string>>();
     }
 }

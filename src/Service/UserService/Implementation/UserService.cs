@@ -30,5 +30,8 @@ namespace MessagingService.Service
 
         public async Task<bool> IsAdmin(string userName)
             => (await _userRepository.Get(u => u.Username == userName && u.Role == Constants.MessageHub.Role.Admin)) != null;
+
+        public async Task<HashSet<string>> GetBlockedUsersOfUser(string username)
+            => await _userRepository.GetSpecifiedFieldByUsername<HashSet<string>>(username, u => u.BlockedUsers);
     }
 }
