@@ -11,7 +11,7 @@ namespace MessagingService.Service
     {
         public async override Task OnActionExecutionAsync(ActionExecutingContext filterContext, ActionExecutionDelegate next)
         {
-            var signInModel = filterContext.ActionArguments.Values.FirstOrDefault() as LoginModel;
+            var signInModel = filterContext.ActionArguments.Values.FirstOrDefault() as SignInModel;
 
             var user = await Startup.GetInstance<IUserService>().GetUser(u => u.Username == signInModel.Username);
 
