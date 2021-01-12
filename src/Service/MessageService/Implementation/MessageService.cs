@@ -18,7 +18,7 @@ namespace MessagingService.Service
         }
 
         public async Task<List<Message>> GetMessages(Expression<Func<Message, bool>> filter)
-            => (await _messageRepository.GetList(filter)).OrderBy(m => m.TimeToSend).ToList();
+            => (await _messageRepository.GetList(filter))?.OrderBy(m => m.TimeToSend)?.ToList();
 
         public async Task<List<Message>> GetMessagesBetweenTwoUser(string userName1, string userName2)
         {
@@ -27,7 +27,7 @@ namespace MessagingService.Service
                     ||
                 (m.SenderUsername == userName2 && m.SenderUsername == userName1));
 
-            return messages.OrderBy(m => m.TimeToSend).ToList();
+            return messages.OrderBy(m => m.TimeToSend)?.ToList();
         }
 
 
