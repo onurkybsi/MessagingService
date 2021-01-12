@@ -73,7 +73,7 @@ namespace MessagingService.Service
 
         private async Task CheckWhetherUserExist(ValidationResult validationResult, string userName)
         {
-            validationResult.IsValid = (await Startup.GetInstance<IUserService>().GetUser(u => u.Username == userName)) != null;
+            validationResult.IsValid = (await Startup.GetInstance<IUserService>().GetUser(u => u.Username == userName)) == null;
             validationResult.Message = validationResult.IsValid ? string.Empty : Constants.ValidationMessages.UserAlreadyExists;
         }
     }
