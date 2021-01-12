@@ -24,9 +24,9 @@ namespace MessagingService.Data
 
         public async Task<TField> GetSpecifiedFieldByUsername<TField>(string username, Expression<Func<User, TField>> fieldExpression)
         {
-            var projectionThatGetSpecifiedFieldByUsername = Builders<User>.Projection.Expression(fieldExpression);
+            var projectionThatGetSpecifiedField = Builders<User>.Projection.Expression(fieldExpression);
 
-            return await _collection.Find(u => u.Username == username).Project(projectionThatGetSpecifiedFieldByUsername).FirstOrDefaultAsync();
+            return await _collection.Find(u => u.Username == username).Project(projectionThatGetSpecifiedField).FirstOrDefaultAsync();
         }
     }
 }
