@@ -1,8 +1,5 @@
-using System.Linq;
-using System.Net;
 using System.Threading.Tasks;
 using MessagingService.Model;
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
 
 namespace MessagingService.Service
@@ -11,17 +8,11 @@ namespace MessagingService.Service
     {
         public async override Task OnActionExecutionAsync(ActionExecutingContext filterContext, ActionExecutionDelegate next)
         {
-            SignUpModel signUpModel = filterContext.ActionArguments.Values.FirstOrDefault() as SignUpModel;
+            SignUpModel signUpModel = RequestModelActionFilterValidatorHelper.GetRequestModel<SignUpModel>(filterContext);
 
             ValidationResult validationResult = await ValidateSignUpModel(signUpModel);
 
-            if (!validationResult.IsValid)
-            {
-                filterContext.HttpContext.Response.StatusCode = (int)HttpStatusCode.BadRequest;
-                filterContext.Result = new JsonResult(validationResult);
-            }
-            else
-            { await next(); }
+            await RequestModelActionFilterValidatorHelper.FinalizeActionFilterValidator(validationResult, filterContext, next);
         }
 
         private async Task<ValidationResult> ValidateSignUpModel(SignUpModel signUpModel)

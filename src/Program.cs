@@ -44,7 +44,7 @@ namespace MessagingService
             {
                 Username = configuration["AdminInfo:Username"],
                 HashedPassword = Service.EncryptionHelper.CreateHashed(configuration["AdminInfo:Password"]),
-                Role = Model.Constants.MessageHub.Role.Admin
+                Role = Model.Constants.MessageHub.Role.Admin,
             });
         }
     }

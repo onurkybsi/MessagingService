@@ -41,11 +41,14 @@ namespace MessagingService.Controllers
             => Ok(MessageHubState.ConnectedUsernames);
 
         [HttpPost]
+        [BlockUserRequestValidator]
         public async Task<IActionResult> BlockUser(BlockUserRequest blockUserRequest)
         {
             string currentUsername = GetCurrentUsername();
 
-            MessageHubState.BlockedUsersInfo.Where(bi => bi.Key == currentUsername).First().Value.Add(blockUserRequest.BlockedUsername);
+            bool isCurrentUserInHub = MessageHubState.BlockedUsersInfo.ContainsKey(currentUsername);
+            if (isCurrentUserInHub)
+                MessageHubState.BlockedUsersInfo.Where(bi => bi.Key == currentUsername).First().Value.Add(blockUserRequest.BlockedUsername);
 
             await _userService.UpdateByUsername(currentUsername, u => { u.BlockedUsers.Add(blockUserRequest.BlockedUsername); });
             _logger.LogInformation($"{blockUserRequest.BlockedUsername} blocked by {currentUsername}");

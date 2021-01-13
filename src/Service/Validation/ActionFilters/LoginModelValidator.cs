@@ -1,8 +1,7 @@
-using System.Linq;
-using System.Net;
+using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using MessagingService.Model;
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
 
 namespace MessagingService.Service
@@ -10,36 +9,12 @@ namespace MessagingService.Service
     public class LoginModelValidator : ActionFilterAttribute
     {
         public async override Task OnActionExecutionAsync(ActionExecutingContext filterContext, ActionExecutionDelegate next)
-        {
-            LoginModel loginModel = filterContext.ActionArguments.Values.FirstOrDefault() as LoginModel;
-
-            ValidationResult validationResult = ValidateLoginModel(loginModel);
-
-            if (!validationResult.IsValid)
+            => await RequestModelActionFilterValidatorHelper.CompleteActionFilterValidatorProcess<LoginModel>(new List<Action<LoginModel, ValidationResult>>
             {
-                filterContext.HttpContext.Response.StatusCode = (int)HttpStatusCode.BadRequest;
-                filterContext.Result = new JsonResult(validationResult);
-            }
-            else
-            { await next(); }
-        }
+                CheckHasDefaultValue, CheckPasswordAvailability
+            }, filterContext, next);
 
-        private ValidationResult ValidateLoginModel(LoginModel loginModel)
-        {
-            ValidationResult validationResult = new ValidationResult();
-
-            CheckHasDefaultValue(validationResult, loginModel);
-            if (!validationResult.IsValid)
-                return validationResult;
-
-            CheckPasswordAvailability(validationResult, loginModel.Password);
-            if (!validationResult.IsValid)
-                return validationResult;
-
-            return validationResult;
-        }
-
-        private void CheckHasDefaultValue(ValidationResult validationResult, LoginModel loginModel)
+        private void CheckHasDefaultValue(LoginModel loginModel, ValidationResult validationResult)
         {
             if (loginModel is null)
             {
@@ -58,9 +33,9 @@ namespace MessagingService.Service
             }
         }
 
-        private void CheckPasswordAvailability(ValidationResult validationResult, string password)
+        private void CheckPasswordAvailability(LoginModel loginModel, ValidationResult validationResult)
         {
-            if (password.Length < 4)
+            if (loginModel.Password.Length < 4)
             {
                 validationResult.IsValid = false;
                 validationResult.Message = Constants.ValidationMessages.PasswordMustBeMoreThanFourCharacters;
