@@ -4,14 +4,17 @@ services:
     image: docker.elastic.co/elasticsearch/elasticsearch:7.10.1
     ports:
       - "9200:9200"
-      - "9300:9300"
     environment:
-      - xpack.monitoring.enabled=true
-      - xpack.watcher.enabled=false
+      - cluster.name=messagingservice
+      - bootstrap.memory_lock=true
       - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
       - discovery.type=single-node
-    # volumes:
-    #   - "/data/logs:/usr/share/elasticsearch/data"
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+    ports:
+      - "9200:9200"
   kibana:
     image: docker.elastic.co/kibana/kibana:7.10.1
     ports:
@@ -22,22 +25,20 @@ services:
       - elasticsearch
   messagingservicedb:
     image: mongo:latest
-    # restart: always
+    restart: always
     ports:
       - 27017:27017
     environment:
-      MONGO_INITDB_DATABASE: messagingservicedb
+      MONGO_INITDB_DATABASE: MessagingServiceDb
       MONGO_INITDB_ROOT_USERNAME: admin
       MONGO_INITDB_ROOT_PASSWORD: admin
-    # volumes:
-    #   - /data/messagingservicedb:/data/db
-  # messagingservice:
-  #   build: ./src
-  #   ports:
-  #     - "5000:80"
-  #   env_file:
-  #     - ./src/.env
-  #   depends_on:
-  #     - messagingservicedb
-  #     - elasticsearch
-  #     - kibana
+  messagingservice:
+    build: ./src
+    ports:
+      - "5000:80"
+    env_file:
+      - ./src/.env
+    depends_on:
+      - messagingservicedb
+      - elasticsearch
+      - kibana

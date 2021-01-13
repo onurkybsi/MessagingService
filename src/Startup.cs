@@ -60,7 +60,6 @@ namespace MessagingService
             else if (env.IsProduction())
                 app.UseHttpsRedirection();
 
-            // testClient.html i ekler.
             app.UseStaticFiles(new StaticFileOptions
             {
                 FileProvider = new PhysicalFileProvider(Path.Combine(env.ContentRootPath, "TestClient")),
