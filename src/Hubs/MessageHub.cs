@@ -36,7 +36,7 @@ namespace MessagingService.Hubs
         }
 
         private bool CheckSenderIsBlocked(string receiverUsername)
-            => MessageHubState.BlockedUsersInfo[receiverUsername].Contains(Context.UserIdentifier);
+            => MessageHubState.BlockedUsersInfo.ContainsKey(receiverUsername) && MessageHubState.BlockedUsersInfo[receiverUsername].Contains(Context.UserIdentifier);
 
         [Authorize(Roles = Constants.MessageHub.Role.Admin)]
         public async Task SendMessageToAllUser(SentMesage sentMessage)

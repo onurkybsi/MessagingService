@@ -23,7 +23,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Content Include="TestClient\testClient.html" />
+    <Content Include="TestClient\**" CopyToPublishDirectory="PreserveNewest" />
   </ItemGroup>
 
 </Project>
