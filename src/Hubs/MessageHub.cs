@@ -59,32 +59,34 @@ namespace MessagingService.Hubs
         private async Task UpdateMessageHubStateAfterConnection(string connectedUserName)
         {
             MessageHubState.ConnectedUsernames.Add(connectedUserName);
-            _logger.LogInformation($"{connectedUserName} connected !");
+
+            HashSet<string> blockedUsers = await _userService.GetBlockedUsersOfUser(connectedUserName);
+            MessageHubState.BlockedUsersInfo.Add(connectedUserName, blockedUsers);
 
             if (await _userService.IsAdmin(connectedUserName))
                 MessageHubState.ConnectedAdminUsernames.Add(connectedUserName);
 
-            HashSet<string> blockedUsers = await _userService.GetBlockedUsersOfUser(connectedUserName);
-            MessageHubState.BlockedUsersInfo.Add(connectedUserName, blockedUsers);
+            _logger.LogInformation($"{connectedUserName} connected !");
         }
 
         public async override Task OnDisconnectedAsync(Exception exception)
         {
             string disconnectedUserName = Context.UserIdentifier;
-            await base.OnDisconnectedAsync(exception);
 
+            await base.OnDisconnectedAsync(exception);
             UpdateMessageHubStateAfterDisconnection(disconnectedUserName);
         }
 
         private void UpdateMessageHubStateAfterDisconnection(string disconnectedUserName)
         {
             MessageHubState.ConnectedUsernames.Remove(disconnectedUserName);
-            _logger.LogInformation($"{disconnectedUserName} disconnected !");
 
             if (MessageHubState.ConnectedAdminUsernames.Contains(disconnectedUserName))
                 MessageHubState.ConnectedAdminUsernames.Remove(disconnectedUserName);
 
             MessageHubState.BlockedUsersInfo.Remove(disconnectedUserName);
+
+            _logger.LogInformation($"{disconnectedUserName} disconnected !");
         }
     }
 
