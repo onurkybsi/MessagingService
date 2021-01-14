@@ -18,7 +18,7 @@ While the client can use MessageHub for real-time messaging, it can use REST API
 
 The REST API usage is described below.
 
-#### Sign Up in the MessagingService
+#### Sign up in the MessagingService
 
 #### Request
 
@@ -31,6 +31,24 @@ The REST API usage is described below.
     HTTP/1.1 200 OK
     Date: Thu, 14 Jan 2021 18:09:14 GMT
     Content-Length: 0
+    
+#### Sign up as admin in the MessagingService
+
+#### Request
+
+`POST api/auth/login`
+
+    curl -v -d '{"Username":"onurkayabasi", "Password":"1234"}' -H "Content-Type: application/json" -X POST http://localhost:8080/api/auth/login
+
+#### Response
+
+    HTTP/1.1 200 OK
+    Date: Thu, 14 Jan 2021 18:17:26 GMT
+    Content-Type: application/json; charset=utf-8
+    Content-Length: 369
+
+    {"isAuthenticated":true,"message":null,"token":"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJJZCI6IjYwMDA4ODdhYzMyMzZkNDI2NjYyMzQwYiIsIm5hbWVpZCI6Im9udXJrYXlhYmFzaSIsInJvbGUiOiJBZG1pbiIsIm5iZiI6MTYxMDY0ODI0NiwiZXhwIjoxNjEwNjUwMDQ2LCJpYXQiOjE2MTA2NDgyNDYsImlzcyI6Imh0dHA6Ly9sb2NhbGhvc3Q6NTAwMCIsImF1ZCI6Ind3dy5iaWxtZW1uZS5jb20ifQ.hJQ_CfXB8hKMxz3gDOsXAy70djVft22Q-kvBwPZLkUo"}
+    
 
 ## Contributing
 Pull requests are welcome. For major changes, please open an issue first to discuss what you would like to change.
