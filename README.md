@@ -16,7 +16,7 @@ While the client can use MessageHub for real-time messaging, it can use REST API
 
 ### MessageHub
 
-[Hubs](https://docs.microsoft.com/en-us/aspnet/core/signalr/hubs?view=aspnetcore-5.0) in SingalR are structures that enable remote calls. MessageHub has two remote calling methods; SendPrivateMessage, SendMessageToAllUser (for admin users only). This method calls the ReceiveMessage method of subscribers connected to the hub at the end of the calls.
+[Hubs](https://docs.microsoft.com/en-us/aspnet/core/signalr/hubs?view=aspnetcore-5.0) in SingalR are structures that enable remote calls. MessageHub has two remote calling methods; `SendPrivateMessage`, `SendMessageToAllUser` (for admin users only). Also, it fire the `ReceiveMessage` event of clients to notify connected users of the messages sent.
 
 #### Example connection to MessageHub
 
