@@ -14,6 +14,16 @@ docker-compose up
 
 While the client can use MessageHub for real-time messaging, it can use REST API to get various information such as the current status of the MessageHub and do authorization jobs required to access MessageHub.
 
+### MessageHub
+
+Hubs in SingalR are structures that enable remote calls. MessageHub has two remote calling methods; SendPrivateMessage, SendMessageToAllUser (for admin users only). This method calls the ReceiveMessage method of subscribers connected to the hub at the end of the calls.
+
+#### Example connection to MessageHub
+
+```javascript
+<script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/3.1.7/signalr.min.js"></script>
+```
+
 ### REST API
 
 The REST API usage is described below.
