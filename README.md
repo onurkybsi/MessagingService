@@ -49,7 +49,7 @@ While the client can use MessageHub for real-time messaging, it can use REST API
       connection.onclose(start);
 
       start();
-    </script>
+</script>
     
     <script>
       connection
