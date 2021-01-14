@@ -1,1 +1,20 @@
 # MessagingService
+
+MessagingService is a web application that provides real-time messaging using SignalR, as well as it keeps the logs of the system with ELK and the data in MongoDB.
+
+## Installation
+
+Use the [docker-compose](https://docs.docker.com/compose/) to install MessagingService.
+
+```bash
+docker-compose up
+```
+
+## Usage
+
+While the client can use MessageHub for real-time messaging, it can use RESTful endpoints to get various information such as the current status of the MessageHub and do authorization jobs required to access MessageHub.
+
+## Contributing
+Pull requests are welcome. For major changes, please open an issue first to discuss what you would like to change.
+
+Please make sure to update tests as appropriate.
