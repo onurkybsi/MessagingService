@@ -49,11 +49,11 @@ The REST API usage is described below.
 
     {"isAuthenticated":true,"message":null,"token":"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJJZCI6IjYwMDA4ODdhYzMyMzZkNDI2NjYyMzQwYiIsIm5hbWVpZCI6Im9udXJrYXlhYmFzaSIsInJvbGUiOiJBZG1pbiIsIm5iZiI6MTYxMDY0ODI0NiwiZXhwIjoxNjEwNjUwMDQ2LCJpYXQiOjE2MTA2NDgyNDYsImlzcyI6Imh0dHA6Ly9sb2NhbGhvc3Q6NTAwMCIsImF1ZCI6Ind3dy5iaWxtZW1uZS5jb20ifQ.hJQ_CfXB8hKMxz3gDOsXAy70djVft22Q-kvBwPZLkUo"}
    
- #### Log in to the MessagingService
+ #### Sign up as a admin in the MessagingService
 
  #### Request
 
-`POST api/auth/login`
+`POST api/auth/signupasadmin`
 
     curl -v -d '{"Username":"adminuser", "Password":"1234"}' -H "Content-Type: application/json" -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJJZCI6IjYwMDA4ODdhYzMyMzZkNDI2NjYyMzQwYiIsIm5hbWVpZCI6Im9udXJrYXlhYmFzaSIsInJvbGUiOiJBZG1pbiIsIm5iZiI6MTYxMDY0ODI0NiwiZXhwIjoxNjEwNjUwMDQ2LCJpYXQiOjE2MTA2NDgyNDYsImlzcyI6Imh0dHA6Ly9sb2NhbGhvc3Q6NTAwMCIsImF1ZCI6Ind3dy5iaWxtZW1uZS5jb20ifQ.hJQ_CfXB8hKMxz3gDOsXAy70djVft22Q-kvBwPZLkUo" -X POST http://localhost:8080/api/auth/signupasadmin
     
