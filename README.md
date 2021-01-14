@@ -1,6 +1,6 @@
 # MessagingService
 
-MessagingService is a web application that provides real-time messaging using SignalR, as well as it keeps the logs of the system with ELK and the data in MongoDB.
+MessagingService is a web application that provides real-time messaging using [SignalR](https://docs.microsoft.com/en-us/aspnet/core/signalr/introduction?view=aspnetcore-5.0), as well as it keeps the logs of the system with [ELK](https://www.elastic.co/what-is/elk-stack) and the data in [MongoDB](https://docs.mongodb.com/manual/).
 
 ## Installation
 
