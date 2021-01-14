@@ -23,9 +23,9 @@ namespace MessagingService.Service
         public async Task<List<Message>> GetMessagesBetweenTwoUser(string userName1, string userName2)
         {
             var messages = await _messageRepository.GetList(m =>
-                (m.SenderUsername == userName1 && m.SenderUsername == userName2)
+                (m.SenderUsername == userName1 && m.ReceiverUsername == userName2)
                     ||
-                (m.SenderUsername == userName2 && m.SenderUsername == userName1));
+                (m.SenderUsername == userName2 && m.ReceiverUsername == userName1));
 
             return messages.OrderBy(m => m.TimeToSend)?.ToList();
         }
