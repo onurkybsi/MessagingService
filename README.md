@@ -14,28 +14,23 @@ docker-compose up
 
 While the client can use MessageHub for real-time messaging, it can use REST API to get various information such as the current status of the MessageHub and do authorization jobs required to access MessageHub.
 
-# REST API
+### REST API
 
 The REST API usage is described below.
 
-## Sign Up in the MessagingService
+#### Sign Up in the MessagingService
 
-### Request
+#### Request
 
 `POST api/auth/signup`
 
-    curl -i -H 'Accept: application/json' http://localhost:5000/api/auth/signup/
+    curl -v -d '{"Username":"testuser", "Password":"1234"}' -H "Content-Type: application/json" -X POST http://localhost:8080/api/auth/signup
 
-### Response
+#### Response
 
     HTTP/1.1 200 OK
-    Date: Thu, 24 Feb 2011 12:36:30 GMT
-    Status: 200 OK
-    Connection: close
-    Content-Type: application/json
-    Content-Length: 2
-
-    []
+    Date: Thu, 14 Jan 2021 18:09:14 GMT
+    Content-Length: 0
 
 ## Contributing
 Pull requests are welcome. For major changes, please open an issue first to discuss what you would like to change.
