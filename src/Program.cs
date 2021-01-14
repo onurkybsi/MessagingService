@@ -34,7 +34,7 @@ namespace MessagingService
                 .ConfigureAppConfiguration(x => x.AddConfiguration(configuration))
                 .ConfigureWebHostDefaults(webBuilder =>
                 {
-                    webBuilder.UseKestrel();
+                    webBuilder.UseKestrel(options => options.AddServerHeader = false);
                     webBuilder.UseStartup<Startup>();
                 }).ConfigureLogging(config => config.ClearProviders()).UseSerilog();
 
