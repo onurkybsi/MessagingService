@@ -34,6 +34,8 @@ services:
       MONGO_INITDB_ROOT_PASSWORD: admin
   messagingservice:
     build: ./src
+    ports: 
+      - "8080:80"
     env_file:
       - ./src/.env
     depends_on:
