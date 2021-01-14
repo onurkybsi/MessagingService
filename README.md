@@ -22,7 +22,7 @@ The REST API usage is described below.
 
 ### Request
 
-`GET api/auth/signup`
+`POST api/auth/signup`
 
     curl -i -H 'Accept: application/json' http://localhost:5000/api/auth/signup/
 
