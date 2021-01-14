@@ -54,7 +54,8 @@ The REST API usage is described below.
  #### Request
 
 `POST api/auth/login`
-curl -v -d '{"Username":"adminuser", "Password":"1234"}' -H "Content-Type: application/json" -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJJZCI6IjYwMDA4ODdhYzMyMzZkNDI2NjYyMzQwYiIsIm5hbWVpZCI6Im9udXJrYXlhYmFzaSIsInJvbGUiOiJBZG1pbiIsIm5iZiI6MTYxMDY0ODcwNSwiZXhwIjoxNjEwNjUwNTA1LCJpYXQiOjE2MTA2NDg3MDUsImlzcyI6Imh0dHA6Ly9sb2NhbGhvc3Q6NTAwMCIsImF1ZCI6Ind3dy5iaWxtZW1uZS5jb20ifQ.zzDb0LXTgL0Fu2GB_pHOKLrJ4GxlsEGv-06p-GpSoe8" -X POST http://localhost:8080/api/auth/signupasadmin
+
+    curl -v -d '{"Username":"adminuser", "Password":"1234"}' -H "Content-Type: application/json" -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJJZCI6IjYwMDA4ODdhYzMyMzZkNDI2NjYyMzQwYiIsIm5hbWVpZCI6Im9udXJrYXlhYmFzaSIsInJvbGUiOiJBZG1pbiIsIm5iZiI6MTYxMDY0ODcwNSwiZXhwIjoxNjEwNjUwNTA1LCJpYXQiOjE2MTA2NDg3MDUsImlzcyI6Imh0dHA6Ly9sb2NhbGhvc3Q6NTAwMCIsImF1ZCI6Ind3dy5iaWxtZW1uZS5jb20ifQ.zzDb0LXTgL0Fu2GB_pHOKLrJ4GxlsEGv-06p-GpSoe8" -X POST http://localhost:8080/api/auth/signupasadmin
     
 
 ## Contributing
