@@ -54,6 +54,8 @@ namespace MessagingService.Hubs
 
             await base.OnConnectedAsync();
             await UpdateMessageHubStateAfterConnection(connectedUserName);
+
+            _logger.LogInformation($"{connectedUserName} connected !");
         }
 
         private async Task UpdateMessageHubStateAfterConnection(string connectedUserName)
@@ -65,8 +67,6 @@ namespace MessagingService.Hubs
 
             if (await _userService.IsAdmin(connectedUserName))
                 MessageHubState.ConnectedAdminUsernames.Add(connectedUserName);
-
-            _logger.LogInformation($"{connectedUserName} connected !");
         }
 
         public async override Task OnDisconnectedAsync(Exception exception)
@@ -75,6 +75,8 @@ namespace MessagingService.Hubs
 
             await base.OnDisconnectedAsync(exception);
             UpdateMessageHubStateAfterDisconnection(disconnectedUserName);
+
+            _logger.LogInformation($"{disconnectedUserName} disconnected !");
         }
 
         private void UpdateMessageHubStateAfterDisconnection(string disconnectedUserName)
@@ -85,8 +87,6 @@ namespace MessagingService.Hubs
                 MessageHubState.ConnectedAdminUsernames.Remove(disconnectedUserName);
 
             MessageHubState.BlockedUsersInfo.Remove(disconnectedUserName);
-
-            _logger.LogInformation($"{disconnectedUserName} disconnected !");
         }
     }
 
