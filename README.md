@@ -22,6 +22,48 @@ Hubs in SingalR are structures that enable remote calls. MessageHub has two remo
 
 ```javascript
 <script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/3.1.7/signalr.min.js"></script>
+
+<script>
+      const connection = new signalR.HubConnectionBuilder()
+        .withUrl("/messagehub", {
+          accessTokenFactory: () =>
+            localStorage.getItem("access_token") != null
+              ? localStorage.getItem("access_token")
+              : "",
+        })
+        .build();
+
+      connection.on("ReceiveMessage", (Message) => {
+        console.log("Message received !: ", message);
+      });
+
+      async function start() {
+        try {
+          await connection.start();
+          console.log("SignalR Connected.");
+        } catch (err) {
+          console.log(err);
+          setTimeout(start, 5000);
+        }
+      }
+      connection.onclose(start);
+
+      start();
+    </script>
+    
+    <script>
+      connection
+        .invoke("SendPrivateMessage", {
+          Message: "Hi !",
+          ReceiverUser: "onurkayabasi",
+        })
+        .then((res) => {
+          console.log(res);
+        })
+        .catch((err) => {
+          console.log(err);
+        });
+    </script>
 ```
 
 ### REST API
