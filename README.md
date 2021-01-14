@@ -51,7 +51,7 @@ While the client can use MessageHub for real-time messaging, it can use REST API
       start();
 </script>
     
-    <script>
+<script>
       connection
         .invoke("SendPrivateMessage", {
           Message: "Hi !",
@@ -63,7 +63,7 @@ While the client can use MessageHub for real-time messaging, it can use REST API
         .catch((err) => {
           console.log(err);
         });
-    </script>
+</script>
 ```
 
 ### REST API
