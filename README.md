@@ -25,7 +25,7 @@ Hubs in SingalR are structures that enable remote calls. MessageHub has two remo
 
 <script>
       const connection = new signalR.HubConnectionBuilder()
-        .withUrl("/messagehub", {
+        .withUrl("http://messagingservicehost:8080/messagehub", {
           accessTokenFactory: () =>
             localStorage.getItem("access_token") != null
               ? localStorage.getItem("access_token")
@@ -33,8 +33,8 @@ Hubs in SingalR are structures that enable remote calls. MessageHub has two remo
         })
         .build();
 
-      connection.on("ReceiveMessage", (Message) => {
-        console.log("Message received !: ", message);
+      connection.on("ReceiveMessage", (message) => {
+        console.log("Message received !: ", message.content);
       });
 
       async function start() {
