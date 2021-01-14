@@ -15,7 +15,7 @@ namespace MessagingService.Infrastructure
             var client = new MongoClient(collectionSettings.DatabaseSettings.ConnectionString);
             var database = client.GetDatabase(collectionSettings.DatabaseSettings.DatabaseName);
 
-            _collection = database.GetCollection<T>(collectionSettings.CollectionName);
+            _collection = database.CreateCollectionIfNotExists<T>(collectionSettings.CollectionName, collectionSettings.CreateCollectionOptions);
         }
 
         public async Task<T> Get(Expression<Func<T, bool>> filter)

@@ -4,6 +4,7 @@ using MongoDB.Driver;
 using System.Threading.Tasks;
 using System.Linq.Expressions;
 using System;
+using MongoDB.Bson;
 
 namespace MessagingService.Data
 {
@@ -16,9 +17,8 @@ namespace MessagingService.Data
 
         private void CreateUniqueIndexForUsername()
         {
-            var keys = Builders<User>.IndexKeys.Text(u => u.Username);
             var indexOptions = new CreateIndexOptions { Name = "Unique_Username", Unique = true, Sparse = true };
-            var model = new CreateIndexModel<User>(keys, indexOptions);
+            var model = new CreateIndexModel<User>(new BsonDocument("Username", 1), indexOptions);
             _collection.Indexes.CreateOne(model);
         }
 

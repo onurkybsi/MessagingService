@@ -140,7 +140,15 @@ namespace MessagingService
                 DatabaseName = Configuration["MessagingServiceDb_DatabaseName"]
             };
 
-            services.AddSingleton<IUserRepository>(ur => new UserRepository(new MongoDBCollectionSettings { DatabaseSettings = messagingServiceDbSettings, CollectionName = "user" }));
+            services.AddSingleton<IUserRepository>(ur => new UserRepository(new MongoDBCollectionSettings
+            {
+                DatabaseSettings = messagingServiceDbSettings,
+                CollectionName = "user",
+                CreateCollectionOptions = new MongoDB.Driver.CreateCollectionOptions
+                {
+                    Collation = new MongoDB.Driver.Collation("tr", true)
+                }
+            }));
             services.AddSingleton<IMessageRepository>(mr => new MessageRepository(new MongoDBCollectionSettings { DatabaseSettings = messagingServiceDbSettings, CollectionName = "message" }));
         }
 
