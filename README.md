@@ -63,6 +63,23 @@ The REST API usage is described below.
     Date: Thu, 14 Jan 2021 18:25:26 GMT
     Content-Length: 0
     
+ #### Get message history between users from the MessagingService
+
+ #### Request
+
+`POST api/auth/signupasadmin`
+
+    curl -v -H "Content-Type: application/json" -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJJZCI6IjYwMDBiNWRlMDYzMGRjMjQxNmYxMjJiYSIsIm5hbWVpZCI6Im9udXJrYXlhYmFzaSIsInJvbGUiOiJBZG1pbiIsIm5iZiI6MTYxMDY1OTQxMywiZXhwIjoxNjEwNjYxMjEzLCJpYXQiOjE2MTA2NTk0MTMsImlzcyI6Imh0dHA6Ly9sb2NhbGhvc3Q6NTAwMCIsImF1ZCI6Ind3dy5iaWxtZW1uZS5jb20ifQ._9Ew1M5X0QPN0G4QYMkKWJZkEo-rOPpHRfhSRJ2CaR8" -X GET http://localhost:8080/api/messagehubinfo/GetMessageHistory?userName=testuser
+    
+#### Response
+
+    HTTP/1.1 200 OK
+    Date: Thu, 14 Jan 2021 21:30:55 GMT
+    Content-Type: application/json; charset=utf-8
+    Content-Length: 570
+    
+    [{"content":"Selam Onur, nasılsın ?\n","senderUsername":"testuser","receiverUsername":"onurkayabasi","timeToSend":"2021-01-14T21:30:55.719866+00:00","id":"6000b6410630dc2416f122bc"},{"content":"Selam, iyiyim teşekkürler sen nasılsın ?\n","senderUsername":"onurkayabasi","receiverUsername":"testuser","timeToSend":"2021-01-14T21:30:55.7199475+00:00","id":"6000b6670630dc2416f122bd"},{"content":"Selam nasıl gidiyor ?\n","senderUsername":"testuser","receiverUsername":"onurkayabasi","timeToSend":"2021-01-14T21:30:55.7200241+00:00","id":"6000b7560630dc2416f122be"}]
+    
 
 ## Contributing
 Pull requests are welcome. For major changes, please open an issue first to discuss what you would like to change.
