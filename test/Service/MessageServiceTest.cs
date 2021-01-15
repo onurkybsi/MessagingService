@@ -37,7 +37,7 @@ namespace MessageServiceTest
 
             MessageService messageService = new MessageService(_messageRepository.Object);
 
-            var messages = messageService.GetMessages(m => m.SenderUsername == "onurkayabasi");
+            var messages = messageService.GetMessages(m => m.SenderUsername == "onurkayabasi").Result;
 
             Assert.Null(messages);
         }
