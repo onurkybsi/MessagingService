@@ -37,7 +37,7 @@ namespace MessagingService.Service
         public async Task SaveMessage(Message message)
             => await _messageRepository.Create(message);
 
-        public async Task CreateMessageGroup(MessageGroupCreationContext context)
+        public Task CreateMessageGroup(MessageGroupCreationContext context)
         {
             throw new NotImplementedException();
         }

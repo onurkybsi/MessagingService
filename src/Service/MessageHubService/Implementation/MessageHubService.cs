@@ -24,12 +24,12 @@ namespace MessagingService.Service
                 MessageHubState.BlockedUsersInfo.Where(bi => bi.Key == context.CurrentUsername).First().Value.Add(context.BlockUserRequest.BlockedUsername);
         }
 
+        public HashSet<string> GetConnectedUsernames()
+            => MessageHubState.ConnectedUsernames;
+
         public void CreateMessageGroup(MessageGroupCreationContext context)
         {
             throw new System.NotImplementedException();
         }
-
-        public HashSet<string> GetConnectedUsernames()
-            => MessageHubState.ConnectedUsernames;
     }
 }

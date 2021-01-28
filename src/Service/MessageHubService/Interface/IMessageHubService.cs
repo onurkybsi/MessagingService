@@ -4,9 +4,8 @@ using MessagingService.Model;
 
 namespace MessagingService.Service
 {
-    public interface IMessageHubService : IBlockUser
+    public interface IMessageHubService : IBlockUser, ICreateMessageGroup
     {
         HashSet<string> GetConnectedUsernames();
-        void CreateMessageGroup(MessageGroupCreationContext context);
     }
 }

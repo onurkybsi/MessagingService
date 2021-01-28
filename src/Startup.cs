@@ -176,6 +176,14 @@ namespace MessagingService
             {
                 bua.GetRequiredService<UserService>()
             }));
+
+            services.AddSingleton<ICreateMessageGroupAction>(bua => new CreateMessageGroupAction(new List<ICreateMessageGroup>
+            {
+                bua.GetRequiredService<MessageHubService>(),
+            }, new List<ICreateMessageGroupAsync>
+            {
+                bua.GetRequiredService<MessageService>()
+            }));
         }
     }
 }
