@@ -66,6 +66,8 @@ While the client can use MessageHub for real-time messaging, it can use REST API
 </script>
 ```
 
+If you want to connect to MessagingHub from different environments, you can review this [document](https://docs.microsoft.com/en-us/aspnet/core/signalr/client-features?view=aspnetcore-5.0).
+
 ### REST API
 
 The REST API usage is described below.
