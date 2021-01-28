@@ -2,11 +2,12 @@ using System;
 using System.Collections.Generic;
 using System.Linq.Expressions;
 using System.Threading.Tasks;
+using MessagingService.Action;
 using MessagingService.Model;
 
 namespace MessagingService.Service
 {
-    public interface IUserService
+    public interface IUserService : IBlockUserAsync
     {
         Task<User> GetUser(Expression<Func<User, bool>> filter);
         Task<List<User>> GetUsers(Expression<Func<User, bool>> filter);

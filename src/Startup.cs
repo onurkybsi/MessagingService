@@ -1,7 +1,9 @@
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Text;
 using System.Threading.Tasks;
+using MessagingService.Action;
 using MessagingService.Data;
 using MessagingService.Hubs;
 using MessagingService.Infrastructure;
@@ -162,6 +164,18 @@ namespace MessagingService
                 Audience = Configuration["JwtAuthSettings_Audience"],
                 SecurityKey = Configuration["JwtAuthSettings_SecurityKey"]
             }, auth.GetRequiredService<IUserService>()));
+            services.AddSingleton<IMessageHubService, MessageHubService>();
+        }
+
+        private void SetupActions(IServiceCollection services)
+        {
+            services.AddSingleton<IBlockUserAction>(bua => new BlockUserAction(new List<IBlockUser>
+            {
+                bua.GetRequiredService<MessageHubService>(),
+            }, new List<IBlockUserAsync>
+            {
+                bua.GetRequiredService<UserService>()
+            }));
         }
     }
 }

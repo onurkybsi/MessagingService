@@ -11,10 +11,14 @@ namespace MessagingService.Service
     public class MessageService : IMessageService
     {
         private readonly IMessageRepository _messageRepository;
+        private readonly IMessageGroupRepository _messageGroupRepository;
+        private readonly IMessageHubService _messageHubService;
 
-        public MessageService(IMessageRepository messageRepository)
+        public MessageService(IMessageRepository messageRepository, IMessageGroupRepository messageGroupRepository, IMessageHubService messageHubService)
         {
             _messageRepository = messageRepository;
+            _messageGroupRepository = messageGroupRepository;
+            _messageHubService = messageHubService;
         }
 
         public async Task<List<Message>> GetMessages(Expression<Func<Message, bool>> filter)
@@ -30,8 +34,12 @@ namespace MessagingService.Service
             return messages.OrderBy(m => m.TimeToSend)?.ToList();
         }
 
-
         public async Task SaveMessage(Message message)
             => await _messageRepository.Create(message);
+
+        public async Task CreateMessageGroup(MessageGroupCreationContext context)
+        {
+            throw new NotImplementedException();
+        }
     }
 }

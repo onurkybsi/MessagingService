@@ -1,7 +1,7 @@
 using System.Linq;
 using System.Security.Claims;
 using System.Threading.Tasks;
-using MessagingService.Hubs;
+using MessagingService.Action;
 using MessagingService.Model;
 using MessagingService.Service;
 using Microsoft.AspNetCore.Authorization;
@@ -13,17 +13,19 @@ namespace MessagingService.Controllers
     [Route("api/[controller]/[action]")]
     [Authorize]
     [ApiController]
-    public class MessageHubInfoController : ControllerBase
+    public class MessageHubController : ControllerBase
     {
-        private readonly ILogger<MessageHubInfoController> _logger;
+        private readonly ILogger<MessageHubController> _logger;
         private readonly IMessageService _messageService;
-        private readonly IUserService _userService;
+        private readonly IMessageHubService _messageHubService;
+        private readonly IBlockUserAction _blockUserAction;
 
-        public MessageHubInfoController(ILogger<MessageHubInfoController> logger, IMessageService messageService, IUserService userService)
+        public MessageHubController(ILogger<MessageHubController> logger, IMessageService messageService, IMessageHubService messageHubService, IBlockUserAction blockUserAction)
         {
             _logger = logger;
             _messageService = messageService;
-            _userService = userService;
+            _messageHubService = messageHubService;
+            _blockUserAction = blockUserAction;
         }
 
         [HttpGet]
@@ -38,22 +40,18 @@ namespace MessagingService.Controllers
         [HttpGet]
         [Authorize(Roles = Model.Constants.MessageHub.Role.Admin)]
         public IActionResult GetConnectedUsernames()
-            => Ok(MessageHubState.ConnectedUsernames);
+            => Ok(_messageHubService.GetConnectedUsernames());
 
         [HttpPost]
         [BlockUserRequestValidator]
-        public async Task<IActionResult> BlockUser(BlockUserRequest blockUserRequest)
+        public IActionResult BlockUser(BlockUserRequest blockUserRequest)
         {
             string currentUsername = GetCurrentUsername();
 
-            bool isCurrentUserInHub = MessageHubState.BlockedUsersInfo.ContainsKey(currentUsername);
-            if (isCurrentUserInHub)
-                MessageHubState.BlockedUsersInfo.Where(bi => bi.Key == currentUsername).First().Value.Add(blockUserRequest.BlockedUsername);
-
-            await _userService.UpdateByUsername(currentUsername, u => { u.BlockedUsers.Add(blockUserRequest.BlockedUsername); });
+            var userBlockingProcessResult = _blockUserAction.BlockUser(new UserBlockingContext { CurrentUsername = currentUsername, BlockUserRequest = blockUserRequest });
             _logger.LogInformation($"{blockUserRequest.BlockedUsername} blocked by {currentUsername}");
 
-            return Ok();
+            return Ok(userBlockingProcessResult);
         }
 
         private string GetCurrentUsername()
