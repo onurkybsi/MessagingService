@@ -8,7 +8,7 @@
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development",
         "ElasticsearchUrl": "http://localhost:9200",
-        "MessagingServiceDb_ConnectionString": "mongodb://localhost:27017",
+        "MessagingServiceDb_ConnectionString": "mongodb+srv://admin:mongoparola123@mymongodb.oiync.mongodb.net/MessagingServiceDb?retryWrites=true&w=majority?ssl=true",
         "MessagingServiceDb_DatabaseName": "MessagingServiceDb",
         "JwtAuthSettings_Issuer": "http://localhost:5000",
         "JwtAuthSettings_Audience": "www.bilmemne.com",

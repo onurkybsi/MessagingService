@@ -37,9 +37,21 @@ namespace MessagingService.Service
         public async Task SaveMessage(Message message)
             => await _messageRepository.Create(message);
 
-        public Task CreateMessageGroup(MessageGroupCreationContext context)
+        public async Task SaveMessageGroup(MessageGroupSaveContext context)
         {
-            throw new NotImplementedException();
+            if (context.SaveType == SaveType.Insert)
+            {
+                await _messageGroupRepository.Create(new MessageGroup
+                {
+                    GroupName = context.CreationContext.GroupName,
+                    AdminUsername = context.CreationContext.AdminUsername
+                });
+            }
+            else
+            {
+                await _messageGroupRepository.FindAndUpdate(mg => mg.GroupName == context.UpdateContext.GroupName,
+                    mg => mg.UsernamesInGroup.Add(context.UpdateContext.AddedUsername));
+            }
         }
     }
 }

@@ -44,7 +44,6 @@ namespace MessagingService
             services.AddCors(o => o.AddPolicy("MessagingServicePolicy", builder =>
             {
                 string[] allowedOrigins = Configuration.GetSection("AllowedOrigin").Get<string[]>();
-
                 builder.WithOrigins(allowedOrigins)
                     .AllowAnyMethod()
                     .AllowAnyHeader()
@@ -152,6 +151,7 @@ namespace MessagingService
                 }
             }));
             services.AddSingleton<IMessageRepository>(mr => new MessageRepository(new MongoDBCollectionSettings { DatabaseSettings = messagingServiceDbSettings, CollectionName = "message" }));
+            services.AddSingleton<IMessageGroupRepository>(mg => new MessageGroupRepository(new MongoDBCollectionSettings { DatabaseSettings = messagingServiceDbSettings, CollectionName = "messagegroup" }));
         }
 
         private void ConfigureBusinessServices(IServiceCollection services)
@@ -177,12 +177,10 @@ namespace MessagingService
                 bua.GetRequiredService<UserService>()
             }));
 
-            services.AddSingleton<ICreateMessageGroupAction>(bua => new CreateMessageGroupAction(new List<ICreateMessageGroup>
+            services.AddSingleton<ISaveMessageGroupAction>(sp => new SaveMessageGroupAction(new List<ISaveMessageGroup>(), new List<ISaveMessageGroupAsync>
             {
-                bua.GetRequiredService<MessageHubService>(),
-            }, new List<ICreateMessageGroupAsync>
-            {
-                bua.GetRequiredService<MessageService>()
+                sp.GetRequiredService<MessageService>(),
+                sp.GetRequiredService<MessageHubService>()
             }));
         }
     }

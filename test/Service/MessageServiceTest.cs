@@ -13,7 +13,12 @@ namespace MessageServiceTest
 {
     public class MessageServiceTest
     {
+        private readonly MessageService _messageService;
+
         private readonly Mock<IMessageRepository> _messageRepository;
+        private readonly Mock<IMessageGroupRepository> _messageGroupRepository;
+        private readonly Mock<IMessageHubService> _messageHubService;
+
         private readonly List<Message> mockCollection = new List<Message>
         {
             new Message {SenderUsername = "onurkayabasi", ReceiverUsername = "testuser", Content = "Hi !"},
@@ -27,6 +32,10 @@ namespace MessageServiceTest
         public MessageServiceTest()
         {
             _messageRepository = new Mock<IMessageRepository>();
+            _messageGroupRepository = new Mock<IMessageGroupRepository>();
+            _messageHubService = new Mock<IMessageHubService>();
+
+            _messageService = new MessageService(_messageRepository.Object, _messageGroupRepository.Object, _messageHubService.Object);
         }
 
 
@@ -35,9 +44,7 @@ namespace MessageServiceTest
         {
             _messageRepository.Setup(mr => mr.GetList(It.IsAny<Expression<Func<Message, bool>>>())).Returns(Task.FromResult(default(List<Message>)));
 
-            MessageService messageService = new MessageService(_messageRepository.Object);
-
-            var messages = messageService.GetMessages(m => m.SenderUsername == "onurkayabasi").Result;
+            var messages = _messageService.GetMessages(m => m.SenderUsername == "onurkayabasi").Result;
 
             Assert.Null(messages);
         }
@@ -47,9 +54,7 @@ namespace MessageServiceTest
         {
             _messageRepository.Setup(mr => mr.GetList(It.IsAny<Expression<Func<Message, bool>>>())).Returns(Task.FromResult(mockCollection));
 
-            MessageService messageService = new MessageService(_messageRepository.Object);
-
-            var messages = messageService.GetMessages(m => m.SenderUsername == "onurkayabasi").Result;
+            var messages = _messageService.GetMessages(m => m.SenderUsername == "onurkayabasi").Result;
 
             Assert.True(messages[0].TimeToSend < messages[1].TimeToSend);
         }
@@ -66,9 +71,7 @@ namespace MessageServiceTest
 
             _messageRepository.Setup(mr => mr.GetList(It.IsAny<Expression<Func<Message, bool>>>())).Returns(Task.FromResult(expectedMessages));
 
-            MessageService messageService = new MessageService(_messageRepository.Object);
-
-            var messages = messageService.GetMessagesBetweenTwoUser("onurkayabasi", "testuser").Result;
+            var messages = _messageService.GetMessagesBetweenTwoUser("onurkayabasi", "testuser").Result;
 
             Assert.DoesNotContain(messages, m => m.ReceiverUsername == "testuser2");
         }
@@ -85,9 +88,7 @@ namespace MessageServiceTest
 
             _messageRepository.Setup(mr => mr.GetList(It.IsAny<Expression<Func<Message, bool>>>())).Returns(Task.FromResult(expectedMessages));
 
-            MessageService messageService = new MessageService(_messageRepository.Object);
-
-            var messages = messageService.GetMessagesBetweenTwoUser("onurkayabasi", "testuser").Result;
+            var messages = _messageService.GetMessagesBetweenTwoUser("onurkayabasi", "testuser").Result;
 
             Assert.True(messages[0].TimeToSend < messages[1].TimeToSend);
         }

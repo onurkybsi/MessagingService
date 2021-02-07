@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using MessagingService.Hubs;
 using MessagingService.Model;
 using Microsoft.AspNetCore.SignalR;
@@ -24,12 +25,23 @@ namespace MessagingService.Service
                 MessageHubState.BlockedUsersInfo.Where(bi => bi.Key == context.CurrentUsername).First().Value.Add(context.BlockUserRequest.BlockedUsername);
         }
 
-        public HashSet<string> GetConnectedUsernames()
-            => MessageHubState.ConnectedUsernames;
+        public List<string> GetConnectedUsernames()
+            => MessageHubState.ConnectedUsers.Keys.ToList();
 
-        public void CreateMessageGroup(MessageGroupCreationContext context)
+        public async Task SaveMessageGroup(MessageGroupSaveContext context)
         {
-            throw new System.NotImplementedException();
+            if (context.SaveType == SaveType.Insert)
+            {
+                string adminConnectionId = MessageHubState.ConnectedUsers[context.CreationContext.AdminUsername];
+                if (!string.IsNullOrEmpty(adminConnectionId))
+                    await _messageHubContex.Groups.AddToGroupAsync(adminConnectionId, context.CreationContext.GroupName);
+            }
+            else
+            {
+                string addedUserConnectionId = MessageHubState.ConnectedUsers[context.UpdateContext.AddedUsername];
+                if (!string.IsNullOrEmpty(addedUserConnectionId))
+                    await _messageHubContex.Groups.AddToGroupAsync(addedUserConnectionId, context.CreationContext.GroupName);
+            }
         }
     }
 }

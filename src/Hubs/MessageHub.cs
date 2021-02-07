@@ -51,16 +51,17 @@ namespace MessagingService.Hubs
         public async override Task OnConnectedAsync()
         {
             string connectedUserName = Context.UserIdentifier;
+            string connectionId = Context.ConnectionId;
 
             await base.OnConnectedAsync();
-            await UpdateMessageHubStateAfterConnection(connectedUserName);
+            await UpdateMessageHubStateAfterConnection(connectedUserName, connectionId);
 
             _logger.LogInformation($"{connectedUserName} connected !");
         }
 
-        private async Task UpdateMessageHubStateAfterConnection(string connectedUserName)
+        private async Task UpdateMessageHubStateAfterConnection(string connectedUserName, string connectionId)
         {
-            MessageHubState.ConnectedUsernames.Add(connectedUserName);
+            MessageHubState.ConnectedUsers.Add(connectedUserName, connectionId);
 
             HashSet<string> blockedUsers = await _userService.GetBlockedUsersOfUser(connectedUserName);
             MessageHubState.BlockedUsersInfo.Add(connectedUserName, blockedUsers);
@@ -81,7 +82,7 @@ namespace MessagingService.Hubs
 
         private void UpdateMessageHubStateAfterDisconnection(string disconnectedUserName)
         {
-            MessageHubState.ConnectedUsernames.Remove(disconnectedUserName);
+            MessageHubState.ConnectedUsers.Remove(disconnectedUserName);
 
             if (MessageHubState.ConnectedAdminUsernames.Contains(disconnectedUserName))
                 MessageHubState.ConnectedAdminUsernames.Remove(disconnectedUserName);
@@ -92,7 +93,7 @@ namespace MessagingService.Hubs
 
     public static class MessageHubState
     {
-        public static HashSet<string> ConnectedUsernames = new HashSet<string>();
+        public static Dictionary<string, string> ConnectedUsers = new Dictionary<string, string>();
         public static HashSet<string> ConnectedAdminUsernames = new HashSet<string>();
         public static Dictionary<string, HashSet<string>> BlockedUsersInfo = new Dictionary<string, HashSet<string>>();
     }
