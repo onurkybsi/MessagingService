@@ -3,8 +3,8 @@ namespace MessagingService.Model
     public class MessageGroupSaveContext
     {
         public SaveType SaveType { get; set; }
-        public MessageGroupCreationContext? CreationContext { get; set; }
-        public MessageGroupUpdateContext? UpdateContext { get; set; }
+        public MessageGroupCreationContext CreationContext { get; set; }
+        public MessageGroupUpdateContext UpdateContext { get; set; }
     }
 
     public class MessageGroupCreationContext
