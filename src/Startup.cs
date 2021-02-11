@@ -40,6 +40,7 @@ namespace MessagingService
             ConfigureAuth(services);
             ConfigureRepositories(services);
             ConfigureBusinessServices(services);
+            SetupActions(services);
 
             services.AddCors(o => o.AddPolicy("MessagingServicePolicy", builder =>
             {
@@ -171,16 +172,16 @@ namespace MessagingService
         {
             services.AddSingleton<IBlockUserAction>(bua => new BlockUserAction(new List<IBlockUser>
             {
-                bua.GetRequiredService<MessageHubService>(),
+                bua.GetRequiredService<IMessageHubService>(),
             }, new List<IBlockUserAsync>
             {
-                bua.GetRequiredService<UserService>()
+                bua.GetRequiredService<IUserService>()
             }));
 
             services.AddSingleton<ISaveMessageGroupAction>(sp => new SaveMessageGroupAction(new List<ISaveMessageGroup>(), new List<ISaveMessageGroupAsync>
             {
-                sp.GetRequiredService<MessageService>(),
-                sp.GetRequiredService<MessageHubService>()
+                sp.GetRequiredService<IMessageService>(),
+                sp.GetRequiredService<IMessageHubService>()
             }));
         }
     }

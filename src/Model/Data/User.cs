@@ -13,6 +13,6 @@ namespace MessagingService.Model
         public string Token { get; set; }
         public string Role { get; set; } = Constants.MessageHub.Role.User;
         public DateTime SystemEntryDate { get; }
-        public HashSet<string> BlockedUsers { get; set; } = new HashSet<string>();
+        public HashSet<string> BlockedUsernames { get; set; } = new HashSet<string>();
     }
 }

@@ -20,9 +20,9 @@ namespace MessagingService.Service
 
         public void BlockUser(UserBlockingContext context)
         {
-            bool isCurrentUserInHub = MessageHubState.BlockedUsersInfo.ContainsKey(context.CurrentUsername);
+            bool isCurrentUserInHub = MessageHubState.ConnectedUsers.ContainsKey(context.CurrentUsername);
             if (isCurrentUserInHub)
-                MessageHubState.BlockedUsersInfo.Where(bi => bi.Key == context.CurrentUsername).First().Value.Add(context.BlockUserRequest.BlockedUsername);
+                MessageHubState.ConnectedUsers[context.CurrentUsername].BlockedUsernames.Add(context.BlockUserRequest.BlockedUsername);
         }
 
         public List<string> GetConnectedUsernames()
@@ -32,13 +32,13 @@ namespace MessagingService.Service
         {
             if (context.SaveType == SaveType.Insert)
             {
-                string adminConnectionId = MessageHubState.ConnectedUsers[context.CreationContext.AdminUsername];
+                string adminConnectionId = MessageHubState.ConnectedUsers[context.CreationContext.AdminUsername]?.ConnectionId;
                 if (!string.IsNullOrEmpty(adminConnectionId))
                     await _messageHubContex.Groups.AddToGroupAsync(adminConnectionId, context.CreationContext.GroupName);
             }
             else
             {
-                string addedUserConnectionId = MessageHubState.ConnectedUsers[context.UpdateContext.AddedUsername];
+                string addedUserConnectionId = MessageHubState.ConnectedUsers[context.UpdateContext.AddedUsername]?.ConnectionId;
                 if (!string.IsNullOrEmpty(addedUserConnectionId))
                     await _messageHubContex.Groups.AddToGroupAsync(addedUserConnectionId, context.CreationContext.GroupName);
             }
