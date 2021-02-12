@@ -1,10 +1,13 @@
 using System;
+using System.Collections.Generic;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
 using System.Threading.Tasks;
+using MessagingService.Infrastructure;
 using MessagingService.Model;
 using Microsoft.IdentityModel.Tokens;
+using Constants = MessagingService.Model.Constants.JwtAuthService;
 
 namespace MessagingService.Service
 {
@@ -19,46 +22,61 @@ namespace MessagingService.Service
             _userService = userService;
         }
 
-        public async Task<AuthResult> Authenticate(LoginModel login)
+        public async Task<AuthResult> Authenticate(LoginModel loginModel)
         {
-            var user = await _userService.GetUser(u => u.Username == login.Username);
+            var processorParams = await CreateAuthenticateProcessorParams(loginModel);
+
+            await Infrastructure.Utility.ProcessorExecuter(processorParams.Context, processorParams.ProcessedResult, async (contex, processedResult) => await _userService.UpdateUser(contex.User),
+                VerifyUser, CreateToken);
+
+            return processorParams.ProcessedResult.MapTo<AuthResult>();
+        }
+
+        private async Task<(AuthenticateContext Context, ProcessResult<AuthResult> ProcessedResult)> CreateAuthenticateProcessorParams(LoginModel loginModel)
+        {
+            ProcessResult<AuthResult> result = new ProcessResult<AuthResult> { IsSuccessful = true, ReturnObject = new AuthResult() };
+            AuthenticateContext contex = await CreateAuthenticateContext(loginModel, result);
+
+            return (contex, result);
+        }
+
+        private async Task<AuthenticateContext> CreateAuthenticateContext(LoginModel loginModel, ProcessResult<AuthResult> result)
+        {
+            AuthenticateContext contex = new AuthenticateContext { LoginModel = loginModel };
+            await GetUser(contex, result);
+
+            return contex;
+        }
+
+        private async Task GetUser(AuthenticateContext context, ProcessResult<AuthResult> result)
+        {
+            var user = await _userService.GetUser(u => u.Username == context.LoginModel.Username);
             if (user is null)
-                return new AuthResult
-                {
-                    IsAuthenticated = false,
-                    Message = Constants.ErrorMessages.UserNotExists
-                };
-
-            if (!VerifyUser(login.Password, user.HashedPassword))
             {
-                return new AuthResult
-                {
-                    IsAuthenticated = false,
-                    Message = Constants.ErrorMessages.PasswordIsNotCorrect
-                };
+                result.IsSuccessful = false;
+                result.Message = Constants.ErrorMessages.NoUserExistsHasThisEmail;
             }
-
-            string createdToken = CreateToken(user);
-
-            user.Token = createdToken;
-            await _userService.UpdateUser(user);
-
-            return new AuthResult
+            else
             {
-                IsAuthenticated = true,
-                Token = createdToken
-            };
+                context.User = user;
+            }
         }
 
-        private bool VerifyUser(string loginPassword, string userHashedPassword)
+        private void VerifyUser(AuthenticateContext context, ProcessResult<AuthResult> result)
         {
-            string userHash = userHashedPassword.Split(EncryptionHelper.SaltPointer)[0];
-            string userSalt = userHashedPassword.Split(EncryptionHelper.SaltPointer)[1];
+            string userHash = context.User.HashedPassword.Split(EncryptionHelper.SaltPointer)[0];
+            string userSalt = context.User.HashedPassword.Split(EncryptionHelper.SaltPointer)[1];
 
-            return !EncryptionHelper.VerifyHashed(loginPassword, userSalt, userHash) ? false : true;
+            bool userVerified = EncryptionHelper.VerifyHashed(context.LoginModel.Password, userSalt, userHash);
+
+            if (!userVerified)
+            {
+                result.IsSuccessful = false;
+                result.Message = Constants.ErrorMessages.PasswordIsNotCorrect;
+            }
         }
 
-        private string CreateToken(User user)
+        private void CreateToken(AuthenticateContext context, ProcessResult<AuthResult> result)
         {
             var tokenHandler = new JwtSecurityTokenHandler();
 
@@ -66,9 +84,9 @@ namespace MessagingService.Service
             {
                 Subject = new ClaimsIdentity(new[]
                 {
-                    new Claim("Id", user.Id),
-                    new Claim(ClaimTypes.NameIdentifier, user.Username),
-                    new Claim(ClaimTypes.Role, user.Role),
+                    new Claim("Id", context.User.Id),
+                    new Claim(ClaimTypes.NameIdentifier, context.User.Username),
+                    new Claim(ClaimTypes.Role, context.User.Role),
                 }),
 
                 Audience = _settings.Audience,
@@ -78,9 +96,16 @@ namespace MessagingService.Service
             };
 
             var token = tokenHandler.CreateToken(tokenDescriptor);
-            string createdToken = tokenHandler.WriteToken(token);
+            string tokenAsString = tokenHandler.WriteToken(token);
 
-            return createdToken;
+            context.User.Token = tokenAsString;
+            result.ReturnObject.Token = tokenAsString;
+        }
+
+        private class AuthenticateContext
+        {
+            public LoginModel LoginModel { get; set; }
+            public User User { get; set; }
         }
     }
 }

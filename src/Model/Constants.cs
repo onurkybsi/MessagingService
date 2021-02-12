@@ -12,10 +12,13 @@ namespace MessagingService.Model
             }
         }
 
-        public static class ErrorMessages
+        public static class JwtAuthService
         {
-            public const string UserNotExists = "UserNotExists";
-            public const string PasswordIsNotCorrect = "PasswordIsNotCorrect";
+            public static class ErrorMessages
+            {
+                public const string NoUserExistsHasThisEmail = "NoUserExistsHasThisEmail";
+                public const string PasswordIsNotCorrect = "PasswordIsNotCorrect";
+            }
         }
 
         public static class ValidationMessages

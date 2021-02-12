@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using MessagingService.Infrastructure;
 using MessagingService.Model;
 using MessagingService.Service;
 using Microsoft.AspNetCore.Authorization;
