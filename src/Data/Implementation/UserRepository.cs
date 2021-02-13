@@ -28,5 +28,11 @@ namespace MessagingService.Data
 
             return await _collection.Find(u => u.Username == username).Project(projectionThatGetSpecifiedField).FirstOrDefaultAsync();
         }
+
+        public async Task UpdateUserTokenById(string id, string token)
+        {
+            var update = Builders<User>.Update.Set("Token", token);
+            var result = await _collection.UpdateOneAsync(u => u.Id == id, update);
+        }
     }
 }

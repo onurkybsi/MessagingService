@@ -18,6 +18,12 @@ namespace MessagingService.Service
         public async Task<User> GetUser(Expression<Func<User, bool>> filter)
             => await _userRepository.Get(filter);
 
+        public async Task<User> GetUserByUsername(string username)
+            => await _userRepository.Get(u => u.Username == username);
+
+        public async Task UpdateUserTokenById(string userId, string token)
+            => await _userRepository.UpdateUserTokenById(userId, token);
+
         public async Task CreateUser(User user)
             => await _userRepository.Create(user);
 

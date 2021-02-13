@@ -1,10 +1,8 @@
 using System;
-using System.Collections.Generic;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
 using System.Threading.Tasks;
-using MessagingService.Infrastructure;
 using MessagingService.Model;
 using Microsoft.IdentityModel.Tokens;
 using Constants = MessagingService.Model.Constants.JwtAuthService;
@@ -24,70 +22,56 @@ namespace MessagingService.Service
 
         public async Task<AuthResult> Authenticate(LoginModel loginModel)
         {
-            var processorParams = await CreateAuthenticateProcessorParams(loginModel);
+            User logedInUser = await _userService.GetUserByUsername(loginModel.Username);
+            bool logedInUserExist = logedInUser != null;
+            if (!logedInUserExist)
+                return CreateUnauthenticatedResult(Constants.ErrorMessages.NoUserExistsHasThisEmail);
 
-            var processorExecuterResult = Infrastructure.Utility.ProcessorExecuter(processorParams.Context, processorParams.ProcessedResult, VerifyUser, CreateToken);
+            bool enteredPasswordVerified = VerifyUserPassword(logedInUser.HashedPassword, loginModel.Password);
+            if (!enteredPasswordVerified)
+                return CreateUnauthenticatedResult(Constants.ErrorMessages.PasswordIsNotCorrect);
 
-            await processorExecuterResult.ProcessExecuterCallBack(async (contex, processedResult) => await _userService.UpdateUser(contex.User));
+            string createdToken = CreateToken(logedInUser);
 
-            return processorExecuterResult.ProcessedResult.MapTo<AuthResult>();
+            await _userService.UpdateUserTokenById(logedInUser.Id, createdToken);
+
+            return CreateAuthenticatedResult(createdToken);
         }
 
-        private async Task<(AuthenticateContext Context, ProcessResult<AuthResult> ProcessedResult)> CreateAuthenticateProcessorParams(LoginModel loginModel)
+        private AuthResult CreateAuthenticatedResult(string token)
+            => new AuthResult { IsAuthenticated = true, Token = token };
+
+        private AuthResult CreateUnauthenticatedResult(string message)
+            => new AuthResult { IsAuthenticated = false, Message = message };
+
+        private bool VerifyUserPassword(string hashedUserPassword, string checkedPassword)
         {
-            ProcessResult<AuthResult> result = new ProcessResult<AuthResult> { IsSuccessful = true, ReturnObject = new AuthResult() };
-            AuthenticateContext contex = await CreateAuthenticateContext(loginModel, result);
+            string userHash = hashedUserPassword.Split(EncryptionHelper.SaltPointer)[0];
+            string userSalt = hashedUserPassword.Split(EncryptionHelper.SaltPointer)[1];
 
-            return (contex, result);
+            bool userVerified = EncryptionHelper.VerifyHashed(checkedPassword, userSalt, userHash);
+
+            return userVerified;
         }
 
-        private async Task<AuthenticateContext> CreateAuthenticateContext(LoginModel loginModel, ProcessResult<AuthResult> result)
-        {
-            AuthenticateContext contex = new AuthenticateContext { LoginModel = loginModel };
-            await GetUser(contex, result);
-
-            return contex;
-        }
-
-        private async Task GetUser(AuthenticateContext context, ProcessResult<AuthResult> result)
-        {
-            var user = await _userService.GetUser(u => u.Username == context.LoginModel.Username);
-            if (user is null)
-            {
-                result.IsSuccessful = false;
-                result.Message = Constants.ErrorMessages.NoUserExistsHasThisEmail;
-            }
-            else
-            {
-                context.User = user;
-            }
-        }
-
-        private void VerifyUser(AuthenticateContext context, ProcessResult<AuthResult> result)
-        {
-            string userHash = context.User.HashedPassword.Split(EncryptionHelper.SaltPointer)[0];
-            string userSalt = context.User.HashedPassword.Split(EncryptionHelper.SaltPointer)[1];
-
-            bool userVerified = EncryptionHelper.VerifyHashed(context.LoginModel.Password, userSalt, userHash);
-
-            if (!userVerified)
-            {
-                result.IsSuccessful = false;
-                result.Message = Constants.ErrorMessages.PasswordIsNotCorrect;
-            }
-        }
-
-        private void CreateToken(AuthenticateContext context, ProcessResult<AuthResult> result)
+        private string CreateToken(User user)
         {
             var tokenHandler = new JwtSecurityTokenHandler();
 
-            var tokenDescriptor = new SecurityTokenDescriptor
+            var token = tokenHandler.CreateToken(CreateTokenDescriptor(user));
+            string tokenAsString = tokenHandler.WriteToken(token);
+
+            return tokenAsString;
+        }
+
+        private SecurityTokenDescriptor CreateTokenDescriptor(User user)
+            => new SecurityTokenDescriptor
             {
                 Subject = new ClaimsIdentity(new[]
-                {
-                    new Claim("Id", context.User.Id),
-                    new Claim(ClaimTypes.NameIdentifier, context.User.Username),
-                    new Claim(ClaimTypes.Role, context.User.Role),
+                            {
+                    new Claim("Id", user.Id),
+                    new Claim(ClaimTypes.NameIdentifier, user.Username),
+                    new Claim(ClaimTypes.Role, user.Role),
                 }),
 
                 Audience = _settings.Audience,
@@ -95,18 +79,5 @@ namespace MessagingService.Service
                 Expires = DateTime.UtcNow.AddMinutes(30),
                 SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_settings.SecurityKey)), SecurityAlgorithms.HmacSha256Signature)
             };
-
-            var token = tokenHandler.CreateToken(tokenDescriptor);
-            string tokenAsString = tokenHandler.WriteToken(token);
-
-            context.User.Token = tokenAsString;
-            result.ReturnObject.Token = tokenAsString;
-        }
-
-        private class AuthenticateContext
-        {
-            public LoginModel LoginModel { get; set; }
-            public User User { get; set; }
-        }
     }
 }

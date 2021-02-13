@@ -9,5 +9,7 @@ namespace MessagingService.Data
     public interface IUserRepository : IEntityRepository<User>
     {
         Task<TField> GetSpecifiedFieldByUsername<TField>(string username, Expression<Func<User, TField>> fieldExpression);
+
+        Task UpdateUserTokenById(string id, string token);
     }
 }
