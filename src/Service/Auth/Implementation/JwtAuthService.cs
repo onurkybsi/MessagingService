@@ -26,10 +26,11 @@ namespace MessagingService.Service
         {
             var processorParams = await CreateAuthenticateProcessorParams(loginModel);
 
-            await Infrastructure.Utility.ProcessorExecuter(processorParams.Context, processorParams.ProcessedResult, async (contex, processedResult) => await _userService.UpdateUser(contex.User),
-                VerifyUser, CreateToken);
+            var processorExecuterResult = await Infrastructure.Utility.ProcessorExecuter(processorParams.Context, processorParams.ProcessedResult, VerifyUser, CreateToken);
 
-            return processorParams.ProcessedResult.MapTo<AuthResult>();
+            await processorExecuterResult.ProcessExecuterCallBack(async (contex, processedResult) => await _userService.UpdateUser(contex.User));
+
+            return processorExecuterResult.ProcessedResult.MapTo<AuthResult>();
         }
 
         private async Task<(AuthenticateContext Context, ProcessResult<AuthResult> ProcessedResult)> CreateAuthenticateProcessorParams(LoginModel loginModel)

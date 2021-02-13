@@ -37,24 +37,25 @@ namespace MessagingService.Infrastructure
             return true;
         }
 
-        public async static Task<bool> ProcessorExecuter<ProcessContext, ReturnObject>(ProcessContext context, ProcessResult<ReturnObject> processed, Func<ProcessContext, ProcessResult<ReturnObject>, Task> processCalback,
+        public async static Task<(ProcessContext Context, ProcessResult<ReturnObject> ProcessedResult)> ProcessorExecuter<ProcessContext, ReturnObject>(ProcessContext context, ProcessResult<ReturnObject> processed,
             params Action<ProcessContext, ProcessResult<ReturnObject>>[] processors)
         {
             if (!processed.IsSuccessful)
-                return false;
+                return (context, processed);
 
             foreach (var processor in processors)
             {
                 processor(context, processed);
 
                 if (!processed.IsSuccessful)
-                    return false;
+                    return (context, processed);
             }
-
-            await processCalback(context, processed);
-
-            return true;
+            return (context, processed);
         }
+
+        public async static Task ProcessExecuterCallBack<ProcessContext, ReturnObject>(this (ProcessContext Context, ProcessResult<ReturnObject> ProcessedResult) processorExecuterResult,
+            Func<ProcessContext, ProcessResult<ReturnObject>, Task> processCallback)
+                => await processCallback(processorExecuterResult.Context, processorExecuterResult.ProcessedResult);
 
         public static void AddIfNoExist<TValue>(this Dictionary<string, TValue> dictionary, string key, TValue value)
         {
