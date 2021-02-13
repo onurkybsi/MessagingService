@@ -7,7 +7,7 @@
 // using Moq;
 // using Xunit;
 
-// namespace MessageServiceTest
+// namespace MessageServiceTest.Service
 // {
 //     public class UserServiceTest
 //     {

@@ -4,7 +4,7 @@ using MessagingService.Service;
 using Moq;
 using Xunit;
 
-namespace MessageServiceTest
+namespace MessageServiceTest.Service
 {
     public class JwtAuthServiceTest
     {

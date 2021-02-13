@@ -1,7 +1,5 @@
-using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Linq.Expressions;
 using System.Threading.Tasks;
 using MessagingService.Data;
 using MessagingService.Model;
@@ -20,9 +18,6 @@ namespace MessagingService.Service
             _messageGroupRepository = messageGroupRepository;
             _messageHubService = messageHubService;
         }
-
-        public async Task<List<Message>> GetMessages(Expression<Func<Message, bool>> filter)
-            => (await _messageRepository.GetList(filter))?.OrderBy(m => m.TimeToSend)?.ToList();
 
         public async Task<List<Message>> GetMessagesBetweenTwoUser(string userName1, string userName2)
         {
