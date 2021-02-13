@@ -55,7 +55,12 @@ namespace MessagingService.Infrastructure
 
         public async static Task ProcessExecuterCallBack<ProcessContext, ReturnObject>(this (ProcessContext Context, ProcessResult<ReturnObject> ProcessedResult) processorExecuterResult,
             Func<ProcessContext, ProcessResult<ReturnObject>, Task> processCallback)
-                => await processCallback(processorExecuterResult.Context, processorExecuterResult.ProcessedResult);
+        {
+            if (processorExecuterResult.ProcessedResult.IsSuccessful)
+                await processCallback(processorExecuterResult.Context, processorExecuterResult.ProcessedResult);
+            else
+                return;
+        }
 
         public static void AddIfNoExist<TValue>(this Dictionary<string, TValue> dictionary, string key, TValue value)
         {
