@@ -25,7 +25,7 @@ namespace MessagingService.Service
             User loggedInUser = await _userService.GetUserByUsername(loginModel.Username);
             bool loggedInUserNotExist = loggedInUser is null;
             if (loggedInUserNotExist)
-                return CreateUnauthenticatedResult(Constants.ErrorMessages.NoUserExistsHasThisEmail);
+                return CreateUnauthenticatedResult(Constants.ErrorMessages.NoUserExistsHasThisUsername);
 
             bool enteredPasswordVerified = VerifyUserPassword(loggedInUser.HashedPassword, loginModel.Password);
             if (!enteredPasswordVerified)

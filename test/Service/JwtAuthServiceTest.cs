@@ -48,7 +48,7 @@ namespace MessageServiceTest
 
             var authResult = JwtAuthService.Authenticate(new LoginModel()).Result;
 
-            Assert.Equal(authResult.Message, Constants.JwtAuthService.ErrorMessages.NoUserExistsHasThisEmail);
+            Assert.Equal(authResult.Message, Constants.JwtAuthService.ErrorMessages.NoUserExistsHasThisUsername);
         }
 
         [Fact]

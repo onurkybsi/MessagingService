@@ -16,7 +16,7 @@ namespace MessagingService.Model
         {
             public static class ErrorMessages
             {
-                public const string NoUserExistsHasThisEmail = "NoUserExistsHasThisEmail";
+                public const string NoUserExistsHasThisUsername = "NoUserExistsHasThisUsername";
                 public const string PasswordIsNotCorrect = "PasswordIsNotCorrect";
             }
         }
