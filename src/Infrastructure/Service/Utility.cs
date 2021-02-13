@@ -37,7 +37,7 @@ namespace MessagingService.Infrastructure
             return true;
         }
 
-        public async static Task<(ProcessContext Context, ProcessResult<ReturnObject> ProcessedResult)> ProcessorExecuter<ProcessContext, ReturnObject>(ProcessContext context, ProcessResult<ReturnObject> processed,
+        public static (ProcessContext Context, ProcessResult<ReturnObject> ProcessedResult) ProcessorExecuter<ProcessContext, ReturnObject>(ProcessContext context, ProcessResult<ReturnObject> processed,
             params Action<ProcessContext, ProcessResult<ReturnObject>>[] processors)
         {
             if (!processed.IsSuccessful)
