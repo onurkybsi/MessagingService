@@ -26,7 +26,7 @@ namespace MessagingService.Service
         {
             var processorParams = await CreateAuthenticateProcessorParams(loginModel);
 
-            var processorExecuterResult = await Infrastructure.Utility.ProcessorExecuter(processorParams.Context, processorParams.ProcessedResult, VerifyUser, CreateToken);
+            var processorExecuterResult = Infrastructure.Utility.ProcessorExecuter(processorParams.Context, processorParams.ProcessedResult, VerifyUser, CreateToken);
 
             await processorExecuterResult.ProcessExecuterCallBack(async (contex, processedResult) => await _userService.UpdateUser(contex.User));
 
