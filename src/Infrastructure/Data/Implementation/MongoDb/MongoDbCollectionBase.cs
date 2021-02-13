@@ -38,6 +38,12 @@ namespace MessagingService.Infrastructure
             await this.Update(updatedEntity);
         }
 
+        public async Task FindAndUpdate(Expression<Func<T, bool>> filterDefinition, Func<UpdateDefinitionBuilder<T>, UpdateDefinition<T>> updateDefinition)
+        {
+            var builder = Builders<T>.Update;
+            await _collection.UpdateOneAsync(filterDefinition, updateDefinition(builder));
+        }
+
         public Task Remove(T entity)
             => _collection.DeleteOneAsync(e => e.Id == entity.Id);
     }

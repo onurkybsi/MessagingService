@@ -5,6 +5,8 @@ using System.Threading.Tasks;
 using System.Linq.Expressions;
 using System;
 using MongoDB.Bson;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace MessagingService.Data
 {
@@ -27,12 +29,6 @@ namespace MessagingService.Data
             var projectionThatGetSpecifiedField = Builders<User>.Projection.Expression(fieldExpression);
 
             return await _collection.Find(u => u.Username == username).Project(projectionThatGetSpecifiedField).FirstOrDefaultAsync();
-        }
-
-        public async Task UpdateUserTokenById(string id, string token)
-        {
-            var update = Builders<User>.Update.Set("Token", token);
-            var result = await _collection.UpdateOneAsync(u => u.Id == id, update);
         }
     }
 }

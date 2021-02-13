@@ -22,7 +22,7 @@ namespace MessagingService.Service
             => await _userRepository.Get(u => u.Username == username);
 
         public async Task UpdateUserTokenById(string userId, string token)
-            => await _userRepository.UpdateUserTokenById(userId, token);
+            => await _userRepository.FindAndUpdate(filterDefinition => filterDefinition.Id == userId, (updatedUser) => { updatedUser.Token = token; });
 
         public async Task CreateUser(User user)
             => await _userRepository.Create(user);

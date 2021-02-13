@@ -22,18 +22,18 @@ namespace MessagingService.Service
 
         public async Task<AuthResult> Authenticate(LoginModel loginModel)
         {
-            User logedInUser = await _userService.GetUserByUsername(loginModel.Username);
-            bool logedInUserExist = logedInUser != null;
-            if (!logedInUserExist)
+            User loggedInUser = await _userService.GetUserByUsername(loginModel.Username);
+            bool loggedInUserNotExist = loggedInUser is null;
+            if (loggedInUserNotExist)
                 return CreateUnauthenticatedResult(Constants.ErrorMessages.NoUserExistsHasThisEmail);
 
-            bool enteredPasswordVerified = VerifyUserPassword(logedInUser.HashedPassword, loginModel.Password);
+            bool enteredPasswordVerified = VerifyUserPassword(loggedInUser.HashedPassword, loginModel.Password);
             if (!enteredPasswordVerified)
                 return CreateUnauthenticatedResult(Constants.ErrorMessages.PasswordIsNotCorrect);
 
-            string createdToken = CreateToken(logedInUser);
+            string createdToken = CreateToken(loggedInUser);
 
-            await _userService.UpdateUserTokenById(logedInUser.Id, createdToken);
+            await _userService.UpdateUserTokenById(loggedInUser.Id, createdToken);
 
             return CreateAuthenticatedResult(createdToken);
         }
