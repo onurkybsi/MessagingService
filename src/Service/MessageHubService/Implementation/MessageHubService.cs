@@ -31,17 +31,21 @@ namespace MessagingService.Service
         public async Task SaveMessageGroup(MessageGroupSaveContext context)
         {
             if (context.SaveType == SaveType.Insert)
-            {
-                string adminConnectionId = MessageHubState.ConnectedUsers[context.CreationContext.AdminUsername]?.ConnectionId;
-                if (!string.IsNullOrEmpty(adminConnectionId))
-                    await _messageHubContex.Groups.AddToGroupAsync(adminConnectionId, context.CreationContext.GroupName);
-            }
+                await UpdateMessageHubGroup(context.CreationContext.AdminUsername, context.CreationContext.GroupName);
             else
-            {
-                string addedUserConnectionId = MessageHubState.ConnectedUsers[context.UpdateContext.AddedUsername]?.ConnectionId;
-                if (!string.IsNullOrEmpty(addedUserConnectionId))
-                    await _messageHubContex.Groups.AddToGroupAsync(addedUserConnectionId, context.CreationContext.GroupName);
-            }
+                await UpdateMessageHubGroup(context.UpdateContext.AddedUsername, context.UpdateContext.GroupName);
         }
+
+        private async Task UpdateMessageHubGroup(string addedUsername, string groupNameToAdd)
+        {
+            ConnectedUserInfo addedUserInfo;
+            MessageHubState.ConnectedUsers.TryGetValue(addedUsername, out addedUserInfo);
+
+            bool addedUserExistInHub = addedUserInfo != null && !string.IsNullOrEmpty(addedUserInfo.ConnectionId);
+            if (addedUserExistInHub)
+                await _messageHubContex.Groups.AddToGroupAsync(addedUserInfo.ConnectionId, groupNameToAdd);
+        }
+
+        public bool MustBeExecuteFirst => false;
     }
 }

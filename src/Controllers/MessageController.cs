@@ -1,6 +1,7 @@
 using System.Linq;
 using System.Security.Claims;
 using System.Threading.Tasks;
+using MessagingService.Infrastructure;
 using MessagingService.Model;
 using MessagingService.Service;
 using Microsoft.AspNetCore.Authorization;
@@ -11,13 +12,15 @@ namespace MessagingService.Controllers
     [Route("api/[controller]/[action]")]
     [Authorize]
     [ApiController]
-    public class MessageController : ControllerBase
+    public class MessageController : ControllerBaseExtra
     {
         private readonly IMessageService _messageService;
+        private readonly Action.ISaveMessageGroupAction _saveMessageGroupAction;
 
-        public MessageController(IMessageService messageService)
+        public MessageController(IMessageService messageService, Action.ISaveMessageGroupAction saveMessageGroupAction)
         {
             _messageService = messageService;
+            _saveMessageGroupAction = saveMessageGroupAction;
         }
 
         [HttpGet]
@@ -36,7 +39,28 @@ namespace MessagingService.Controllers
             return Ok(await _messageService.GetMessagesBetweenTwoUser(GetCurrentUsername(), userName));
         }
 
-        private string GetCurrentUsername()
-            => User.Claims.First(c => c.Type == ClaimTypes.NameIdentifier).Value;
+        [HttpPost]
+        public IActionResult CreateMessageGroup([FromBody] MessageGroupCreationContext context)
+        {
+            ProcessResult messageGroupCreationResult = _saveMessageGroupAction.SaveMessageGroup(new MessageGroupSaveContext
+            {
+                SaveType = SaveType.Insert,
+                CreationContext = new MessageGroupCreationContext { AdminUsername = GetCurrentUsername(), GroupName = context.GroupName }
+            });
+
+            return Ok(messageGroupCreationResult);
+        }
+
+        [HttpPost]
+        public IActionResult UpdateMessageGroup([FromBody] MessageGroupUpdateContext context)
+        {
+            ProcessResult messageGroupUpdateResult = _saveMessageGroupAction.SaveMessageGroup(new MessageGroupSaveContext
+            {
+                SaveType = SaveType.Update,
+                UpdateContext = new MessageGroupUpdateContext { AddedUsername = context.AddedUsername, GroupName = context.GroupName }
+            });
+
+            return Ok(messageGroupUpdateResult);
+        }
     }
 }

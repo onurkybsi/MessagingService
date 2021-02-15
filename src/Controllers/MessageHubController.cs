@@ -20,7 +20,7 @@ namespace MessagingService.Controllers
 
         [HttpGet]
         [Authorize(Roles = Model.Constants.MessageHub.Role.Admin)]
-        public IActionResult GetMessageHubState()
+        public IActionResult GetConnectedUsers()
             => Ok(Hubs.MessageHubState.ConnectedUsers);
     }
 }

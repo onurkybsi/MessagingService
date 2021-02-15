@@ -19,6 +19,7 @@ namespace MessagingService.Service
             _messageHubService = messageHubService;
         }
 
+
         public async Task<List<Message>> GetMessagesBetweenTwoUser(string userName1, string userName2)
         {
             var messages = await _messageRepository.GetList(m =>
@@ -48,5 +49,7 @@ namespace MessagingService.Service
                     mg => mg.UsernamesInGroup.Add(context.UpdateContext.AddedUsername));
             }
         }
+
+        public bool MustBeExecuteFirst => true;
     }
 }
