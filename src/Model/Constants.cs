@@ -34,6 +34,7 @@ namespace MessagingService.Model
             public static class ErrorMessages
             {
                 public const string SaveMessageGroupInfoMessageCanNotCreate = "SaveMessageGroupInfoMessageCanNotCreate";
+                public const string MessageGroupIdIsNullOrEmpty = "MessageGroupIdIsNullOrEmpty";
             }
         }
     }

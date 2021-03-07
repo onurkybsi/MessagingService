@@ -94,29 +94,21 @@ namespace MessageServiceTest.Service
         }
 
         [Fact]
-        public void SaveMessageGroup_When_SaveType_IsInsert_Calls_MessageRepository_Create()
+        public void SaveMessageGroup_When_TransactionType_IsInsert_Calls_MessageRepository_Create()
         {
             _messageGroupRepository.Setup(mr => mr.Create(It.Is<MessageGroup>(m => m.Id == mockMessageGroupCollection[0].Id && m.AdminUsername == mockMessageGroupCollection[0].AdminUsername)));
 
-            Task.FromResult(_messageService.SaveMessageGroup(new MessageGroupSaveContext
-            {
-                SaveType = SaveType.Insert,
-                CreationContext = new MessageGroupCreationContext { AdminUsername = mockMessageGroupCollection[0].AdminUsername }
-            }));
+            Task.FromResult(_messageService.SaveMessageGroup(new MessageGroupSaveContext(mockMessageGroupCollection[0].AdminUsername, mockMessageGroupCollection[0].GroupName)));
 
             _messageGroupRepository.Verify(m => m.Create(It.Is<MessageGroup>(m => m.Id == mockMessageGroupCollection[0].Id && m.AdminUsername == mockMessageGroupCollection[0].AdminUsername)), Times.Once);
         }
 
         [Fact]
-        public void SaveMessageGroup_When_SaveType_IsUpdate_Calls_MessageRepository_FindAndUpdate()
+        public void SaveMessageGroup_When_TransactionType_IsUpdate_Calls_MessageRepository_FindAndUpdate()
         {
             _messageGroupRepository.Setup(mr => mr.FindAndUpdate(It.IsAny<Expression<Func<MessageGroup, bool>>>(), It.IsAny<Action<MessageGroup>>()));
 
-            Task.FromResult(_messageService.SaveMessageGroup(new MessageGroupSaveContext
-            {
-                SaveType = SaveType.Update,
-                UpdateContext = new MessageGroupUpdateContext { AddedUsername = mockMessageGroupCollection[0].AdminUsername }
-            }));
+            Task.FromResult(_messageService.SaveMessageGroup(new MessageGroupSaveContext(mockMessageGroupCollection[0].AdminUsername, mockMessageGroupCollection[0].Id, "updated", MessageGroupUpdateType.AdditionToGroup)));
 
             _messageGroupRepository.Verify(mr => mr.FindAndUpdate(It.IsAny<Expression<Func<MessageGroup, bool>>>(), It.IsAny<Action<MessageGroup>>()), Times.Once);
         }

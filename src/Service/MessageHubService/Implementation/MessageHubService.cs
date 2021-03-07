@@ -34,7 +34,7 @@ namespace MessagingService.Service
         public async Task SaveMessageGroup(MessageGroupSaveContext context)
         {
             if (string.IsNullOrEmpty(context.MessageGroupId))
-                throw new System.Exception($"{nameof(context.MessageGroupId)} is null or empty");
+                throw new System.Exception(Constants.MessageHubService.ErrorMessages.MessageGroupIdIsNullOrEmpty);
 
             var userInHub = CheckUserExistInHub(context.TransactionType == TransactionType.Insert
                 ? context.CreationContext.AdminUsername
