@@ -44,7 +44,7 @@ namespace MessagingService
 
             services.AddCors(o => o.AddPolicy("MessagingServicePolicy", builder =>
             {
-                string[] allowedOrigins = Configuration.GetSection("AllowedOrigin").Get<string[]>();
+                string[] allowedOrigins = Configuration.GetStringArray("AllowedOrigin");
                 builder.WithOrigins(allowedOrigins)
                     .AllowAnyMethod()
                     .AllowAnyHeader()
