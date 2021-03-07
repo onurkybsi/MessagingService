@@ -9,9 +9,15 @@ namespace MessagingService.Infrastructure
     {
         Task<T> Get(Expression<Func<T, bool>> filter);
         Task<List<T>> GetList(Expression<Func<T, bool>> filter = null);
-        Task Create(T entity);
+        /// <summary>
+        /// It create entity, return Id of created entity 
+        /// </summary>
+        Task<object> Create(T entity);
         Task Update(T entity);
-        Task FindAndUpdate(Expression<Func<T, bool>> filterDefinition, Action<T> updateDefinition);
+        /// <summary>
+        /// It find to be updated entity, update it, return Id of updated entity 
+        /// </summary>
+        Task<object> FindAndUpdate(Expression<Func<T, bool>> filterDefinition, Action<T> updateDefinition);
         Task Remove(T entity);
     }
 }

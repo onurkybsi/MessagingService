@@ -52,7 +52,6 @@ namespace MessageServiceTest.Service
         [Fact]
         public void SaveMessageGroup_When_SaveType_Is_Insert_And_AdminUser_Exists_In_MessageHubState_Call_AddToGroupAsync()
         {
-            MessageHubState.ConnectedUsers.Clear();
             MessageHubState.ConnectedUsers.Add("onurkayabasi", new ConnectedUserInfo { ConnectionId = "connectionid" });
             _mockGroupManager.Setup(gm => gm.AddToGroupAsync("connectionid", "testgroup", CancellationToken.None));
 
@@ -80,17 +79,16 @@ namespace MessageServiceTest.Service
         [Fact]
         public void SaveMessageGroup_When_SaveType_Is_Update_And_AddedUser_Exists_In_MessageHubState_Call_AddToGroupAsync()
         {
-            MessageHubState.ConnectedUsers.Clear();
-            MessageHubState.ConnectedUsers.Add("onurkayabasi", new ConnectedUserInfo { ConnectionId = "connectionid" });
-            _mockGroupManager.Setup(gm => gm.AddToGroupAsync("connectionid", "testgroup", CancellationToken.None));
+            MessageHubState.ConnectedUsers.Add("onurkayabasi2", new ConnectedUserInfo { ConnectionId = "connectionid2" });
+            _mockGroupManager.Setup(gm => gm.AddToGroupAsync("connectionid2", "testgroup2", CancellationToken.None));
 
             Task.FromResult(_messageHubService.SaveMessageGroup(new MessageGroupSaveContext
             {
                 SaveType = SaveType.Update,
-                UpdateContext = new MessageGroupUpdateContext { AddedUsername = "onurkayabasi", GroupName = "testgroup" }
+                UpdateContext = new MessageGroupUpdateContext { AddedUsername = "onurkayabasi2", GroupName = "testgroup2" }
             }));
 
-            _mockGroupManager.Verify(gm => gm.AddToGroupAsync("connectionid", "testgroup", CancellationToken.None), Times.Once);
+            _mockGroupManager.Verify(gm => gm.AddToGroupAsync("onurkayabasi2", "testgroup2", CancellationToken.None), Times.Once);
         }
     }
 }

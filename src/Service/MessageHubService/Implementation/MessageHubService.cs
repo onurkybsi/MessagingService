@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 using MessagingService.Hubs;
 using MessagingService.Model;
 using Microsoft.AspNetCore.SignalR;
+using Microsoft.Extensions.Logging;
 
 namespace MessagingService.Service
 {
@@ -11,11 +12,13 @@ namespace MessagingService.Service
     {
         private readonly IUserService _userService;
         private readonly IHubContext<MessageHub> _messageHubContex;
+        private readonly ILogger<MessageHubService> _logger;
 
-        public MessageHubService(IUserService userService, IHubContext<MessageHub> messageHubContex)
+        public MessageHubService(IUserService userService, IHubContext<MessageHub> messageHubContex, ILogger<MessageHubService> logger)
         {
             _userService = userService;
             _messageHubContex = messageHubContex;
+            _logger = logger;
         }
 
         public void BlockUser(UserBlockingContext context)
@@ -30,22 +33,51 @@ namespace MessagingService.Service
 
         public async Task SaveMessageGroup(MessageGroupSaveContext context)
         {
-            if (context.SaveType == SaveType.Insert)
-                await UpdateMessageHubGroup(context.CreationContext.AdminUsername, context.CreationContext.GroupName);
+            if (string.IsNullOrEmpty(context.MessageGroupId))
+                throw new System.Exception($"{nameof(context.MessageGroupId)} is null or empty");
+
+            var userInHub = CheckUserExistInHub(context.TransactionType == TransactionType.Insert
+                ? context.CreationContext.AdminUsername
+                : context.UpdateContext.Username);
+
+            if (!userInHub.ExistInGroup)
+                return;
+
+            if (context.TransactionType == TransactionType.Update && context.UpdateContext.UpdateType == MessageGroupUpdateType.EliminationFromGroup)
+                await _messageHubContex.Groups.RemoveFromGroupAsync(userInHub.ConnectionId, context.MessageGroupId);
             else
-                await UpdateMessageHubGroup(context.UpdateContext.AddedUsername, context.UpdateContext.GroupName);
+                await _messageHubContex.Groups.AddToGroupAsync(userInHub.ConnectionId, context.MessageGroupId);
+
+            _logger.LogInformation(GetSaveMessageGroupInfoMessage(context));
         }
 
-        private async Task UpdateMessageHubGroup(string addedUsername, string groupNameToAdd)
+        private (bool ExistInGroup, string ConnectionId) CheckUserExistInHub(string username)
         {
-            ConnectedUserInfo addedUserInfo;
-            MessageHubState.ConnectedUsers.TryGetValue(addedUsername, out addedUserInfo);
+            ConnectedUserInfo userInfo;
+            MessageHubState.ConnectedUsers.TryGetValue(username, out userInfo);
 
-            bool addedUserExistInHub = addedUserInfo != null && !string.IsNullOrEmpty(addedUserInfo.ConnectionId);
-            if (addedUserExistInHub)
-                await _messageHubContex.Groups.AddToGroupAsync(addedUserInfo.ConnectionId, groupNameToAdd);
+            bool userExistInHub = userInfo != null && !string.IsNullOrEmpty(userInfo.ConnectionId);
+
+            return (userExistInHub, userInfo.ConnectionId);
         }
 
-        public bool MustBeExecuteFirst => false;
+        private string GetSaveMessageGroupInfoMessage(MessageGroupSaveContext context)
+        {
+            string infoMessage = Constants.MessageHubService.ErrorMessages.SaveMessageGroupInfoMessageCanNotCreate;
+
+            if (context.TransactionType == TransactionType.Insert)
+            {
+                infoMessage = string.Format("New message group created: {0} by: {1}", context.CreationContext.GroupName, context.CreationContext.AdminUsername);
+            }
+            else if (context.TransactionType == TransactionType.Update && context.UpdateContext.UpdateType == MessageGroupUpdateType.AdditionToGroup)
+            {
+                infoMessage = string.Format("User: {0} added to message group: {1}", context.UpdateContext.GroupName, context.UpdateContext.Username);
+            }
+            else
+            {
+                infoMessage = string.Format("{0} deleted from {1} message group", context.UpdateContext.Username, context.UpdateContext.GroupName);
+            }
+            return infoMessage;
+        }
     }
 }

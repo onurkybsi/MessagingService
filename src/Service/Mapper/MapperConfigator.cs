@@ -9,9 +9,6 @@ namespace MessagingService.Service
         private static Mapper Mapper = new Mapper(new MapperConfiguration(
             cfg =>
             {
-                cfg.CreateMap<User, ConnectedUserInfo>()
-                .ForMember(d => d.IsAdmin, opt => opt.MapFrom(s => s.Role == Constants.MessageHub.Role.Admin));
-
                 cfg.CreateMap<ProcessResult<AuthResult>, AuthResult>()
                 .ForMember(d => d.IsAuthenticated, opt => opt.MapFrom(u => u.IsSuccessful))
                 .ForMember(d => d.Token, opt => opt.MapFrom(u => u.ReturnObject.Token));

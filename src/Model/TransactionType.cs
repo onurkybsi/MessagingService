@@ -1,8 +1,9 @@
 namespace MessagingService.Model
 {
-    public enum SaveType
+    public enum TransactionType
     {
         Insert,
-        Update
+        Update,
+        Delete
     }
 }

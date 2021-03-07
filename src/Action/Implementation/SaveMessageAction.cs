@@ -22,13 +22,8 @@ namespace MessagingService.Action
             ProcessResult processResult = new ProcessResult { IsSuccessful = true };
             try
             {
-                _messageGroupRecorders.Where(msgc => msgc.MustBeExecuteFirst).ToList().ForEach(msgc => msgc.SaveMessageGroup(context));
-                _asyncMessageGroupRecorders?.Where(msgc => msgc.MustBeExecuteFirst).ToList().ForEach(async (asyncmsgc) =>
-                {
-                    await asyncmsgc.SaveMessageGroup(context);
-                });
-                _messageGroupRecorders?.Where(msgc => !msgc.MustBeExecuteFirst).ToList().ForEach(msgc => msgc.SaveMessageGroup(context));
-                _asyncMessageGroupRecorders?.Where(msgc => !msgc.MustBeExecuteFirst).ToList().ForEach(async (asyncmsgc) =>
+                _messageGroupRecorders.ForEach(msgc => msgc.SaveMessageGroup(context));
+                _asyncMessageGroupRecorders.ForEach(async (asyncmsgc) =>
                 {
                     await asyncmsgc.SaveMessageGroup(context);
                 });

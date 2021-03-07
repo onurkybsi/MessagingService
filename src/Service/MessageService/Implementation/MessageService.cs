@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -19,7 +20,6 @@ namespace MessagingService.Service
             _messageHubService = messageHubService;
         }
 
-
         public async Task<List<Message>> GetMessagesBetweenTwoUser(string userName1, string userName2)
         {
             var messages = await _messageRepository.GetList(m =>
@@ -35,9 +35,11 @@ namespace MessagingService.Service
 
         public async Task SaveMessageGroup(MessageGroupSaveContext context)
         {
-            if (context.SaveType == SaveType.Insert)
+            object savedMessageGroupId;
+
+            if (context.TransactionType == TransactionType.Insert)
             {
-                await _messageGroupRepository.Create(new MessageGroup
+                savedMessageGroupId = await _messageGroupRepository.Create(new MessageGroup
                 {
                     GroupName = context.CreationContext.GroupName,
                     AdminUsername = context.CreationContext.AdminUsername
@@ -45,11 +47,15 @@ namespace MessagingService.Service
             }
             else
             {
-                await _messageGroupRepository.FindAndUpdate(mg => mg.GroupName == context.UpdateContext.GroupName,
-                    mg => mg.UsernamesInGroup.Add(context.UpdateContext.AddedUsername));
+                savedMessageGroupId = await _messageGroupRepository.FindAndUpdate(mg => mg.GroupName == context.UpdateContext.GroupName && mg.AdminUsername == mg.AdminUsername,
+                    GetUpdateActionByUpdateType(context.UpdateContext.UpdateType, context.UpdateContext.Username));
             }
+            context.MessageGroupId = savedMessageGroupId.ToString();
         }
 
-        public bool MustBeExecuteFirst => true;
+        private Action<MessageGroup> GetUpdateActionByUpdateType(MessageGroupUpdateType transactionType, string userName)
+            => transactionType == MessageGroupUpdateType.AdditionToGroup
+                ? (mg) => mg.UsernamesInGroup.Add(userName)
+                : (mg) => mg.UsernamesInGroup.Remove(userName);
     }
 }

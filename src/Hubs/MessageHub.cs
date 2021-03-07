@@ -1,5 +1,4 @@
 using System;
-using System.Collections.Generic;
 using System.Threading.Tasks;
 using MessagingService.Infrastructure;
 using MessagingService.Model;
@@ -26,6 +25,17 @@ namespace MessagingService.Hubs
 
         public async Task SendPrivateMessage(SentMesage sentMessage)
         {
+            ExecuteBeforeSendPrivateMessage(sentMessage);
+
+            var message = new Message { Content = sentMessage.Message, SenderUsername = Context.UserIdentifier, ReceiverUsername = sentMessage.ReceiverUser };
+
+            await Clients.Users(Context.UserIdentifier, sentMessage.ReceiverUser).ReceiveMessage(message);
+
+            await ExecuteAfterSendPrivateMessage(message);
+        }
+
+        private void ExecuteBeforeSendPrivateMessage(SentMesage sentMessage)
+        {
             if (MessageHubState.BlackList.Contains(Context.ConnectionId))
             {
                 Context.Abort();
@@ -34,52 +44,40 @@ namespace MessagingService.Hubs
 
             if (CheckSenderIsBlocked(sentMessage.ReceiverUser))
                 return;
+        }
 
-            var message = new Message { Content = sentMessage.Message, SenderUsername = Context.UserIdentifier, ReceiverUsername = sentMessage.ReceiverUser };
-
-            await Clients.Users(Context.UserIdentifier, sentMessage.ReceiverUser).ReceiveMessage(message);
-
+        private async Task ExecuteAfterSendPrivateMessage(Message message)
+        {
             await _messageService.SaveMessage(message);
         }
 
         private bool CheckSenderIsBlocked(string receiverUsername)
             => MessageHubState.ConnectedUsers.ContainsKey(receiverUsername) && MessageHubState.ConnectedUsers[receiverUsername].BlockedUsernames.Contains(Context.UserIdentifier);
-
-
-        [Authorize(Roles = Constants.MessageHub.Role.Admin)]
-        public async Task SendMessageToAllUser(SentMesage sentMessage)
-        {
-            var message = new Message { Content = sentMessage.Message, SenderUsername = Context.UserIdentifier, ReceiverUsername = Constants.MessageHub.AllUsers };
-
-            await Clients.All.ReceiveMessage(message);
-
-            await _messageService.SaveMessage(message);
-        }
-
+        
         public async override Task OnConnectedAsync()
         {
             string connectedUserName = Context.UserIdentifier;
             string connectionId = Context.ConnectionId;
 
-            HandleConnectionContext(connectedUserName, connectionId);
+            ExecuteBeforeOnConnectedAsync(connectedUserName, connectionId);
             await base.OnConnectedAsync();
-            await UpdateMessageHubStateAfterConnection(connectedUserName, connectionId);
-
-            _logger.LogInformation($"{connectedUserName} connected with {connectionId} !");
+            await ExecuteAfterOnConnectedAsync(connectedUserName, connectionId);
         }
 
-        private void HandleConnectionContext(string connectedUserName, string connectionId)
+        private void ExecuteBeforeOnConnectedAsync(string connectedUserName, string connectionId)
         {
             if (MessageHubState.ConnectedUsers.ContainsKey(connectedUserName))
                 MessageHubState.BlackList.AddIfNoExist(MessageHubState.ConnectedUsers[connectedUserName].ConnectionId);
         }
 
-        private async Task UpdateMessageHubStateAfterConnection(string connectedUserName, string connectionId)
+        private async Task ExecuteAfterOnConnectedAsync(string connectedUserName, string connectionId)
         {
             ConnectedUserInfo connectedUserInfo = await _userService.GetConnectedUserInfo(connectedUserName);
             connectedUserInfo.ConnectionId = connectionId;
 
             MessageHubState.ConnectedUsers[connectedUserName] = connectedUserInfo;
+
+            _logger.LogInformation($"{connectedUserName} connected with {connectionId} !");
         }
 
         public async override Task OnDisconnectedAsync(Exception exception)
@@ -88,25 +86,15 @@ namespace MessagingService.Hubs
             string disconnectedConnectionId = Context.ConnectionId;
 
             await base.OnDisconnectedAsync(exception);
-            UpdateMessageHubStateAfterDisconnection(disconnectedUserName, disconnectedConnectionId);
-
-            _logger.LogInformation($"{disconnectedUserName} disconnected with {disconnectedConnectionId} !");
+            ExecuteAfterOnDisconnectedAsync(disconnectedUserName, disconnectedConnectionId);
         }
 
-        private void UpdateMessageHubStateAfterDisconnection(string disconnectedUserName, string disconnectedConnectionId)
+        private void ExecuteAfterOnDisconnectedAsync(string disconnectedUserName, string disconnectedConnectionId)
         {
             MessageHubState.ConnectedUsers.RemoveIfExist(disconnectedUserName);
             MessageHubState.BlackList.RemoveIfExist(disconnectedConnectionId);
+
+            _logger.LogInformation($"{disconnectedUserName} disconnected with {disconnectedConnectionId} !");
         }
-    }
-
-    public static class MessageHubState
-    {
-        public static Dictionary<string, ConnectedUserInfo> ConnectedUsers = new Dictionary<string, ConnectedUserInfo>();
-
-        /// <summary>
-        /// When the second connection is connected with the existing username, the first connection is blacklisted.
-        /// </summary>
-        public static HashSet<string> BlackList { get; set; } = new HashSet<string>();
     }
 }

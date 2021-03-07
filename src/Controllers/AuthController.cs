@@ -1,7 +1,6 @@
 using System.Threading.Tasks;
 using MessagingService.Model;
 using MessagingService.Service;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 
@@ -37,26 +36,6 @@ namespace MessagingService.Controllers
 
             await _userService.CreateUser(createdUser);
             _logger.LogInformation($"{createdUser.Id}-{createdUser.Id} signed in as user!");
-
-            return Ok();
-        }
-
-        [HttpPost]
-        [Authorize(Roles = Constants.MessageHub.Role.Admin)]
-        [SignUpModelValidator]
-        public async Task<IActionResult> SignUpAsAdmin([FromBody] SignUpModel newUser)
-        {
-            string hashedPass = EncryptionHelper.CreateHashed(newUser.Password);
-
-            var createdUser = new User
-            {
-                Username = newUser.Username,
-                HashedPassword = hashedPass,
-                Role = Constants.MessageHub.Role.Admin
-            };
-
-            await _userService.CreateUser(createdUser);
-            _logger.LogInformation($"{createdUser.Id}-{createdUser.Id} signed in as admin!");
 
             return Ok();
         }

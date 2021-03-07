@@ -24,18 +24,28 @@ namespace MessagingService.Infrastructure
         public async Task<List<T>> GetList(Expression<Func<T, bool>> filter = null)
             => filter is null ? (await _collection.FindAsync(document => true)).ToList() : (await _collection.FindAsync(new ExpressionFilterDefinition<T>(filter))).ToList();
 
-        public async Task Create(T entity)
-            => await _collection.InsertOneAsync(entity);
+        public async Task<object> Create(T entity)
+        {
+            entity.Id = MongoDB.Bson.ObjectId.GenerateNewId().ToString();
+            await _collection.InsertOneAsync(entity);
+            return entity.Id;
+        }
 
         public Task Update(T entity)
             => string.IsNullOrEmpty(entity.Id) ? Task.CompletedTask : _collection.ReplaceOneAsync(e => e.Id == entity.Id, entity);
 
         // It will be changed. This may not be optimal solution
-        public async Task FindAndUpdate(Expression<Func<T, bool>> filterDefinition, Action<T> updateDefinition)
+        public async Task<object> FindAndUpdate(Expression<Func<T, bool>> filterDefinition, Action<T> updateDefinition)
         {
             T updatedEntity = (await _collection.FindAsync(new ExpressionFilterDefinition<T>(filterDefinition))).FirstOrDefault();
+            if (updatedEntity == default(T))
+            {
+                throw new Exception("Expressed entity does not exist");
+            }
             updateDefinition(updatedEntity);
             await this.Update(updatedEntity);
+
+            return updatedEntity.Id;
         }
 
         public async Task FindAndUpdate(Expression<Func<T, bool>> filterDefinition, Func<UpdateDefinitionBuilder<T>, UpdateDefinition<T>> updateDefinition)

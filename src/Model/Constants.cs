@@ -28,5 +28,13 @@ namespace MessagingService.Model
             public const string StringCanNotBeNullEmptyOrWhiteSpace = "StringCanNotBeNullEmptyOrWhiteSpace";
             public const string PasswordMustBeMoreThanFourCharacters = "PasswordMustBeMoreThanFourCharacters";
         }
+
+        public static class MessageHubService
+        {
+            public static class ErrorMessages
+            {
+                public const string SaveMessageGroupInfoMessageCanNotCreate = "SaveMessageGroupInfoMessageCanNotCreate";
+            }
+        }
     }
 }

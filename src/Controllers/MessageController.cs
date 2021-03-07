@@ -40,26 +40,30 @@ namespace MessagingService.Controllers
         }
 
         [HttpPost]
+        [MessageGroupCreationContextValidator]
         public IActionResult CreateMessageGroup([FromBody] MessageGroupCreationContext context)
         {
-            ProcessResult messageGroupCreationResult = _saveMessageGroupAction.SaveMessageGroup(new MessageGroupSaveContext
-            {
-                SaveType = SaveType.Insert,
-                CreationContext = new MessageGroupCreationContext { AdminUsername = GetCurrentUsername(), GroupName = context.GroupName }
-            });
-
+            ProcessResult messageGroupCreationResult = _saveMessageGroupAction.SaveMessageGroup(new MessageGroupSaveContext(GetCurrentUsername(), context.GroupName));
             return Ok(messageGroupCreationResult);
         }
 
-        [HttpPost]
-        public IActionResult UpdateMessageGroup([FromBody] MessageGroupUpdateContext context)
+        [HttpPut]
+        [MessageGroupUpdateContextValidator]
+        public IActionResult AddUserToMessageGroup([FromBody] MessageGroupUpdateContext context)
         {
-            ProcessResult messageGroupUpdateResult = _saveMessageGroupAction.SaveMessageGroup(new MessageGroupSaveContext
-            {
-                SaveType = SaveType.Update,
-                UpdateContext = new MessageGroupUpdateContext { AddedUsername = context.AddedUsername, GroupName = context.GroupName }
-            });
+            ProcessResult messageGroupUpdateResult = _saveMessageGroupAction.SaveMessageGroup(
+                new MessageGroupSaveContext(GetCurrentUsername(), context.GroupName, context.Username, MessageGroupUpdateType.AdditionToGroup)
+            );
+            return Ok(messageGroupUpdateResult);
+        }
 
+        [HttpDelete]
+        [MessageGroupUpdateContextValidator]
+        public IActionResult DeleteUserFromMessageGroup([FromBody] MessageGroupUpdateContext context)
+        {
+            ProcessResult messageGroupUpdateResult = _saveMessageGroupAction.SaveMessageGroup(
+                new MessageGroupSaveContext(GetCurrentUsername(), context.GroupName, context.Username, MessageGroupUpdateType.EliminationFromGroup)
+            );
             return Ok(messageGroupUpdateResult);
         }
     }
