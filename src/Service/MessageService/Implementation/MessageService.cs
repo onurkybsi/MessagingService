@@ -35,27 +35,32 @@ namespace MessagingService.Service
 
         public async Task SaveMessageGroup(MessageGroupSaveContext context)
         {
-            object savedMessageGroupId;
-
             if (context.TransactionType == TransactionType.Insert)
             {
-                savedMessageGroupId = await _messageGroupRepository.Create(new MessageGroup
+                var savedMessageGroupId = await _messageGroupRepository.Create(new MessageGroup
                 {
                     GroupName = context.CreationContext.GroupName,
                     AdminUsername = context.CreationContext.AdminUsername
                 });
+                context.MessageGroupId = savedMessageGroupId.ToString();
             }
             else
             {
-                savedMessageGroupId = await _messageGroupRepository.FindAndUpdate(mg => mg.GroupName == context.UpdateContext.GroupName && mg.AdminUsername == mg.AdminUsername,
+                await _messageGroupRepository.FindAndUpdate(mg => mg.GroupName == context.UpdateContext.MessageGroupId,
                     GetUpdateActionByUpdateType(context.UpdateContext.UpdateType, context.UpdateContext.Username));
             }
-            context.MessageGroupId = savedMessageGroupId.ToString();
         }
 
-        private Action<MessageGroup> GetUpdateActionByUpdateType(MessageGroupUpdateType transactionType, string userName)
-            => transactionType == MessageGroupUpdateType.AdditionToGroup
-                ? (mg) => mg.UsernamesInGroup.Add(userName)
-                : (mg) => mg.UsernamesInGroup.Remove(userName);
+        private Action<MessageGroup> GetUpdateActionByUpdateType(MessageGroupUpdateType updateType, string userName)
+        {
+            if (updateType == MessageGroupUpdateType.AdditionToGroup)
+            {
+                return (mg) => mg.UsernamesInGroup.Add(userName);
+            }
+            else
+            {
+                return (mg) => mg.UsernamesInGroup.Remove(userName);
+            }
+        }
     }
 }

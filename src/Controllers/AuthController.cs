@@ -51,7 +51,6 @@ namespace MessagingService.Controllers
             else
                 _logger.LogInformation($"{login.Username} could not login: {loginResult.Message}");
 
-
             return Ok(loginResult);
         }
     }

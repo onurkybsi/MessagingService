@@ -21,10 +21,10 @@ namespace MessagingService.Service
                 validationResult.IsValid = false;
                 validationResult.Message = $"{Constants.ValidationMessages.ValueCanNotBeNull}: {nameof(messageGroupUpdateContext)}";
             }
-            else if (string.IsNullOrEmpty(messageGroupUpdateContext.GroupName) || string.IsNullOrWhiteSpace(messageGroupUpdateContext.GroupName))
+            else if (string.IsNullOrEmpty(messageGroupUpdateContext.MessageGroupId) || string.IsNullOrWhiteSpace(messageGroupUpdateContext.MessageGroupId))
             {
                 validationResult.IsValid = false;
-                validationResult.Message = $"{Constants.ValidationMessages.StringCanNotBeNullEmptyOrWhiteSpace}: {nameof(messageGroupUpdateContext.GroupName)}";
+                validationResult.Message = $"{Constants.ValidationMessages.StringCanNotBeNullEmptyOrWhiteSpace}: {nameof(messageGroupUpdateContext.MessageGroupId)}";
             }
             else if (string.IsNullOrEmpty(messageGroupUpdateContext.Username) || string.IsNullOrWhiteSpace(messageGroupUpdateContext.Username))
             {

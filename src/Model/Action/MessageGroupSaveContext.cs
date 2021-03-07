@@ -12,22 +12,25 @@ namespace MessagingService.Model
             CreationContext = new MessageGroupCreationContext { AdminUsername = processorUsername, GroupName = groupName };
         }
         public MessageGroupUpdateContext UpdateContext { get; private set; }
-        public MessageGroupSaveContext(string processorUsername, string groupName, string updatedUsername, MessageGroupUpdateType updateType)
+        public MessageGroupSaveContext(string processorUsername, string groupId, string updatedUsername, MessageGroupUpdateType updateType)
         {
             ProcessorUsername = processorUsername;
             TransactionType = TransactionType.Update;
-            UpdateContext = new MessageGroupUpdateContext { GroupName = groupName, Username = updatedUsername, UpdateType = updateType };
+            MessageGroupId = groupId;
+            UpdateContext = new MessageGroupUpdateContext { MessageGroupId = groupId, Username = updatedUsername, UpdateType = updateType };
         }
         public string MessageGroupId { get; set; }
     }
 
-    public class MessageGroupCreationContext : MessageGroupProcessContext
+    public class MessageGroupCreationContext
     {
+        public string GroupName { get; set; }
         public string AdminUsername { get; set; }
     }
 
-    public class MessageGroupUpdateContext : MessageGroupProcessContext
+    public class MessageGroupUpdateContext
     {
+        public string MessageGroupId { get; set; }
         public string Username { get; set; }
         public MessageGroupUpdateType UpdateType { get; set; }
     }
@@ -36,10 +39,5 @@ namespace MessagingService.Model
     {
         AdditionToGroup,
         EliminationFromGroup
-    }
-
-    public class MessageGroupProcessContext
-    {
-        public string GroupName { get; set; }
     }
 }

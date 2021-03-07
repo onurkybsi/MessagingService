@@ -71,11 +71,11 @@ namespace MessagingService.Service
             }
             else if (context.TransactionType == TransactionType.Update && context.UpdateContext.UpdateType == MessageGroupUpdateType.AdditionToGroup)
             {
-                infoMessage = string.Format("User: {0} added to message group: {1}", context.UpdateContext.GroupName, context.UpdateContext.Username);
+                infoMessage = string.Format("User: {0} added to message group: {1}", context.UpdateContext.MessageGroupId, context.UpdateContext.Username);
             }
             else
             {
-                infoMessage = string.Format("{0} deleted from {1} message group", context.UpdateContext.Username, context.UpdateContext.GroupName);
+                infoMessage = string.Format("{0} deleted from {1} message group", context.UpdateContext.Username, context.UpdateContext.MessageGroupId);
             }
             return infoMessage;
         }

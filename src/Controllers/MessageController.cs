@@ -1,11 +1,10 @@
-using System.Linq;
-using System.Security.Claims;
 using System.Threading.Tasks;
 using MessagingService.Infrastructure;
 using MessagingService.Model;
 using MessagingService.Service;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Logging;
 
 namespace MessagingService.Controllers
 {
@@ -52,7 +51,7 @@ namespace MessagingService.Controllers
         public IActionResult AddUserToMessageGroup([FromBody] MessageGroupUpdateContext context)
         {
             ProcessResult messageGroupUpdateResult = _saveMessageGroupAction.SaveMessageGroup(
-                new MessageGroupSaveContext(GetCurrentUsername(), context.GroupName, context.Username, MessageGroupUpdateType.AdditionToGroup)
+                new MessageGroupSaveContext(GetCurrentUsername(), context.MessageGroupId, context.Username, MessageGroupUpdateType.AdditionToGroup)
             );
             return Ok(messageGroupUpdateResult);
         }
@@ -62,7 +61,7 @@ namespace MessagingService.Controllers
         public IActionResult DeleteUserFromMessageGroup([FromBody] MessageGroupUpdateContext context)
         {
             ProcessResult messageGroupUpdateResult = _saveMessageGroupAction.SaveMessageGroup(
-                new MessageGroupSaveContext(GetCurrentUsername(), context.GroupName, context.Username, MessageGroupUpdateType.EliminationFromGroup)
+                new MessageGroupSaveContext(GetCurrentUsername(), context.MessageGroupId, context.Username, MessageGroupUpdateType.EliminationFromGroup)
             );
             return Ok(messageGroupUpdateResult);
         }
