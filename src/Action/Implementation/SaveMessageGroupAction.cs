@@ -52,13 +52,13 @@ namespace MessagingService.Action
             if (!processResult.IsSuccessful)
                 return;
 
-            _asyncMessageGroupRecorders.ForEach(async (asyncmsgc) =>
+            _asyncMessageGroupRecorders.ForEach((asyncmsgc) =>
             {
                 if (!processResult.IsSuccessful)
                     return;
                 try
                 {
-                    await asyncmsgc.SaveMessageGroup(context);
+                    asyncmsgc.SaveMessageGroup(context).Wait();
                 }
                 catch (System.Exception ex)
                 {

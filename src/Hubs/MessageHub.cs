@@ -77,7 +77,7 @@ namespace MessagingService.Hubs
 
             MessageHubState.ConnectedUsers[connectedUserName] = connectedUserInfo;
 
-            _logger.LogInformation($"{connectedUserName} connected with {connectionId} !");
+            _logger.LogInformation($"{connectedUserName} connected with connection id: {connectionId} !");
         }
 
         public async override Task OnDisconnectedAsync(Exception exception)
@@ -94,7 +94,7 @@ namespace MessagingService.Hubs
             MessageHubState.ConnectedUsers.RemoveIfExist(disconnectedUserName);
             MessageHubState.BlackList.RemoveIfExist(disconnectedConnectionId);
 
-            _logger.LogInformation($"{disconnectedUserName} disconnected with {disconnectedConnectionId} !");
+            _logger.LogInformation($"{disconnectedUserName} disconnected with connection id: {disconnectedConnectionId} !");
         }
     }
 }

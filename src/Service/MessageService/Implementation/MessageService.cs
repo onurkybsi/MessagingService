@@ -40,7 +40,8 @@ namespace MessagingService.Service
                 var savedMessageGroupId = await _messageGroupRepository.Create(new MessageGroup
                 {
                     GroupName = context.CreationContext.GroupName,
-                    AdminUsername = context.CreationContext.AdminUsername
+                    AdminUsername = context.CreationContext.AdminUsername,
+                    UsernamesInGroup = new HashSet<string> { context.CreationContext.AdminUsername }
                 });
                 context.MessageGroupId = savedMessageGroupId.ToString();
             }
