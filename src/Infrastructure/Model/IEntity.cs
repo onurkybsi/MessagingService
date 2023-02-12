@@ -1,4 +1,3 @@
-namespace MessagingService.Infrastructure
-{
-    public interface IEntity { }
+namespace MessagingService.Infrastructure {
+  public interface IEntity { }
 }

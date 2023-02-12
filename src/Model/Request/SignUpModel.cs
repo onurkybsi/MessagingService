@@ -1,8 +1,6 @@
-namespace MessagingService.Model
-{
-    public class SignUpModel 
-    {
-        public string Username { get; set; }
-        public string Password { get; set; }
-    }
+namespace MessagingService.Model {
+  public class SignUpModel {
+    public string Username { get; set; }
+    public string Password { get; set; }
+  }
 }

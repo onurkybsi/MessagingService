@@ -1,7 +1,5 @@
-namespace MessagingService.Infrastructure
-{
-    public interface IDatabaseSettings
-    {
-        string ConnectionString { get; set; }
-    }
+namespace MessagingService.Infrastructure {
+  public interface IDatabaseSettings {
+    string ConnectionString { get; set; }
+  }
 }
