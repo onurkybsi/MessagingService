@@ -28,7 +28,7 @@ namespace MessagingService.Controllers {
     [HttpGet]
     public async Task<IActionResult> GetMessageHistoryWithTheUser(string userName) {
       if (string.IsNullOrEmpty(userName) || string.IsNullOrWhiteSpace(userName))
-        return BadRequest(new JsonResult(new Model.ValidationResult { IsValid = false, Message = Constants.ValidationMessages.StringCanNotBeNullEmptyOrWhiteSpace }));
+        return BadRequest(new JsonResult(new ValidationResult { IsValid = false, Message = Constants.ValidationMessages.StringCanNotBeNullEmptyOrWhiteSpace }));
 
       return Ok(await _messageService.GetMessagesBetweenTwoUser(GetCurrentUsername(), userName));
     }

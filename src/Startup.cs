@@ -21,22 +21,19 @@ using Serilog;
 using EnvironmentName = Microsoft.Extensions.Hosting.EnvironmentName;
 
 namespace MessagingService {
+
   public class Startup {
+
     public Startup(IConfiguration configuration) {
       Configuration = configuration;
     }
 
     public IConfiguration Configuration { get; }
-    private static IServiceProvider ServiceProvider { get; set; }
-
-    public static T GetInstance<T>()
-        => ServiceProvider.GetRequiredService<T>();
 
     public void ConfigureServices(IServiceCollection services) {
       ConfigureAuth(services);
       ConfigureRepositories(services);
       ConfigureBusinessServices(services);
-      SetupActions(services);
 
       services.AddCors(o => o.AddPolicy("MessagingServicePolicy", builder => {
         string[] allowedOrigins = Configuration.GetStringArray("AllowedOrigin");
@@ -76,11 +73,10 @@ namespace MessagingService {
         endpoints.MapHub<MessageHub>("/messagehub");
       });
 
-      ServiceProvider = app.ApplicationServices;
       Log.ForContext<Startup>().Information("{Application} is listening on {Env}...", env.ApplicationName, env.EnvironmentName);
     }
 
-    public void ConfigureAuth(IServiceCollection services) {
+    private void ConfigureAuth(IServiceCollection services) {
       services.AddAuthentication(options => {
         options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
         options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
@@ -92,12 +88,11 @@ namespace MessagingService {
           ValidateIssuer = Configuration.GetAspNetCoreEnvironmentName() != EnvironmentName.Development,
           ValidateLifetime = true,
           ValidateIssuerSigningKey = true,
-          ValidIssuer = Configuration["JwtAuthSettings_Issuer"],
-          ValidAudience = Configuration["JwtAuthSettings_Audience"],
-          IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(Configuration["JwtAuthSettings_SecurityKey"])),
+          ValidIssuer = Configuration["JwtAuthConfiguration.Issuer"],
+          ValidAudience = Configuration["JwtAuthConfiguration.Audience"],
+          IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(Configuration["JwtAuthConfiguration.SecurityKey"])),
           ClockSkew = TimeSpan.Zero
         };
-
         options.Events = new JwtBearerEvents {
           OnMessageReceived = context => {
             var accessToken = context.Request.Query["access_token"];
@@ -145,20 +140,6 @@ namespace MessagingService {
       services.AddSingleton<IMessageHubService, MessageHubService>();
     }
 
-    private void SetupActions(IServiceCollection services) {
-      services.AddSingleton<IBlockUserAction>(bua => new BlockUserAction(new List<IBlockUser>
-      {
-                bua.GetRequiredService<IMessageHubService>(),
-            }, new List<IBlockUserAsync>
-      {
-                bua.GetRequiredService<IUserService>()
-            }));
-
-      services.AddSingleton<ISaveMessageGroupAction>(sp => new SaveMessageGroupAction(new List<ISaveMessageGroup>(), new List<ISaveMessageGroupAsync>
-      {
-                sp.GetRequiredService<IMessageService>(),
-                sp.GetRequiredService<IMessageHubService>()
-            }));
-    }
   }
+
 }

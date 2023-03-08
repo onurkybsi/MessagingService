@@ -11,6 +11,7 @@ using Serilog;
 namespace MessagingService {
 
   public class Program {
+
     public static void Main(string[] args) {
       var configuration = InitialHelper.GetConfiguration(Directory.GetCurrentDirectory(), Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT"));
 
@@ -21,8 +22,6 @@ namespace MessagingService {
 
       var host = CreateHostBuilder(args, configuration).Build();
 
-      CreateAdmin(host.Services.GetService(typeof(IUserService)) as IUserService, configuration);
-
       host.Run();
     }
 
@@ -32,15 +31,9 @@ namespace MessagingService {
                     .ConfigureWebHostDefaults(webBuilder => {
                       webBuilder.UseKestrel(options => options.AddServerHeader = false);
                       webBuilder.UseStartup<Startup>();
-                    }).ConfigureLogging(config => config.ClearProviders()).UseSerilog();
+                    })
+                    .ConfigureLogging(config => config.ClearProviders()).UseSerilog();
 
-    private static void CreateAdmin(IUserService userService, IConfiguration configuration) {
-      userService.CreateUser(new Model.User {
-        Username = configuration["AdminInfo:Username"],
-        HashedPassword = Service.EncryptionHelper.CreateHashed(configuration["AdminInfo:Password"]),
-        Role = Model.Constants.MessageHub.Role.Admin,
-      });
-    }
   }
 
 }
