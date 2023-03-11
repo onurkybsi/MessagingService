@@ -18,6 +18,7 @@ using Microsoft.Extensions.FileProviders;
 using Microsoft.Extensions.Hosting;
 using Microsoft.IdentityModel.Tokens;
 using Serilog;
+using Microsoft.EntityFrameworkCore;
 using EnvironmentName = Microsoft.Extensions.Hosting.EnvironmentName;
 
 namespace MessagingService {
@@ -34,6 +35,9 @@ namespace MessagingService {
       ConfigureAuth(services);
       ConfigureRepositories(services);
       ConfigureBusinessServices(services);
+
+      services.AddDbContext<MessagingServiceDbContext>(options =>
+          options.UseNpgsql("Host=my_host;Database=my_db;Username=my_user;Password=my_pw"));
 
       services.AddCors(o => o.AddPolicy("MessagingServicePolicy", builder => {
         string[] allowedOrigins = Configuration.GetStringArray("AllowedOrigin");

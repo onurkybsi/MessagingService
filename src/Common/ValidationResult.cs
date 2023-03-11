@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using Newtonsoft.Json;
 
 namespace MessagingService.Common {
 
@@ -7,7 +8,9 @@ namespace MessagingService.Common {
     private readonly Dictionary<string, List<string>> propertyFailures = new Dictionary<string, List<string>>();
 
     public void AddFailure(string propertyName, string failureMessage) {
-      // TODO: Do the assertions
+      Assertions.NotBlank(propertyName, "propertyName cannot be blank!");
+      Assertions.NotBlank(failureMessage, "failureMessage cannot be blank!");
+
       if (!propertyFailures.ContainsKey(propertyName)) {
         propertyFailures.Add(propertyName, new List<string>());
       }
@@ -19,8 +22,7 @@ namespace MessagingService.Common {
     }
 
     public override string ToString() {
-      // TODO: Return JSON representation
-      return base.ToString();
+      return JsonConvert.SerializeObject(propertyFailures);
     }
 
   }
